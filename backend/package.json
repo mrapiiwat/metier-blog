@@ -1,0 +1,24 @@
+{
+	"name": "backend",
+	"version": "1.0.50",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"dev": "bun run --watch src/index.ts",
+		"build": "bun build ./src/index.ts --outdir ./dist --target bun",
+		"start": "bun src/index.ts",
+		"lint": "biome lint .",
+		"format": "biome format --write .",
+		"check": "biome check --write ."
+	},
+	"dependencies": {
+		"drizzle-orm": "^0.45.2",
+		"elysia": "latest",
+		"postgres": "^3.4.9"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.5.0",
+		"bun-types": "latest",
+		"drizzle-kit": "^0.31.10"
+	},
+	"module": "src/index.js"
+}
