@@ -1,4 +1,5 @@
 CREATE TYPE comment_status AS ENUM ('pending', 'approved', 'rejected');
+CREATE TYPE ai_recommendation AS ENUM ('approve', 'reject', 'flagged', 'pending');
 
 CREATE TABLE admins (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -44,9 +45,12 @@ CREATE TABLE comments (
     blog_id UUID NOT NULL REFERENCES blogs(id) ON DELETE CASCADE,
     sender_name VARCHAR(100) NOT NULL,
     message TEXT NOT NULL,
-    status comment_status DEFAULT 'pending',
+    status comment_status DEFAULT 'pending', 
+    ai_suggestion ai_recommendation DEFAULT 'pending',
+    ai_reason TEXT,                              
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 CREATE INDEX idx_comments_blog_id_status ON comments (blog_id, status);
+CREATE INDEX idx_comments_ai_suggestion ON comments (ai_suggestion);
