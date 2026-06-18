@@ -1,22 +1,26 @@
 import React from 'react'
 import Image from 'next/image'
+import Link from 'next/link';
 
 interface PostCardProps {
+    slug: string;
     title: string;
     excerpt: string;
     img: string;
 }
 
-const PostCard: React.FC<PostCardProps> = ({ title, excerpt, img }) => {
+const PostCard: React.FC<PostCardProps> = ({ slug, title, excerpt, img }) => {
     return (
         <div className="grid grid-cols-1 md:grid-cols-[40%_1fr] gap-6 items-start">
             <div className="relative w-120 h-75 shrink-0">
-                <Image
-                    src={img}
-                    alt={title}
-                    fill
-                    className="object-cover rounded-lg"
-                />
+                <Link href={`/blogs/${slug}`}>
+                    <Image
+                        src={img}
+                        alt={title}
+                        fill
+                        className="object-cover rounded-lg"
+                    />
+                </Link>
             </div>
 
             <div className="flex flex-col">
@@ -37,9 +41,9 @@ const PostCard: React.FC<PostCardProps> = ({ title, excerpt, img }) => {
                     {excerpt}
                 </p>
 
-                <button className="bg-[#FF5959] cursor-pointer text-white px-5 py-2.5 rounded-md font-bold text-sm md:text-base w-fit hover:bg-[#ff4646] transition-colors">
+                <Link href={`/blogs/${slug}`} className="bg-[#FF5959] cursor-pointer text-white px-5 py-2.5 rounded-md font-bold text-sm md:text-base w-fit hover:bg-[#ff4646] transition-colors">
                     Read full article...
-                </button>
+                </Link>
             </div>
         </div>
     )

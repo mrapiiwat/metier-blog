@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import Link from 'next/link'
 
 const LatestSection = () => {
   return (
@@ -13,7 +14,7 @@ const LatestSection = () => {
         <p className="mb-6 font-light line-clamp-6">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.
           Duis aute irure dolor in reprehenderit in voluptate v
           Duis aute irure dolor in reprehenderit in volusse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.</p>
-        <button className="bg-[#FF7A7A] text-white px-8 py-3 rounded-md font-bold">Read more</button>
+        <Link href={`/blogs/a-review-of-cars-with-advanced-infotainment-systems`} className="bg-[#FF5959] hover:bg-[#FF7A7A] text-white px-8 py-3 rounded-md font-bold">Read more</Link>
       </div>
     </div>
   )

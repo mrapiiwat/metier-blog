@@ -22,7 +22,6 @@ const Footer = () => {
         <div className="flex flex-wrap justify-center gap-5 md:gap-6 text-sm font-medium">
           <Link className={getLinkClass("/")} href="/">Home</Link>
           <Link className={getLinkClass("/blogs")} href="/blogs">Blogs</Link>
-          <Link className={getLinkClass("/about")} href="/about">About us</Link>
           <Link className={getLinkClass("/contact")} href="/contact">Contact us</Link>
         </div>
       </div>

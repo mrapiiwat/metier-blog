@@ -25,6 +25,7 @@ const Blogs = () => {
         {data.map((post) => (
           <PostCard
             key={post.id}
+            slug={post.slug}
             title={post.title}
             excerpt={post.excerpt}
             img={post.img}
