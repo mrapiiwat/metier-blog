@@ -10,7 +10,7 @@ const Header = () => {
 
   const navLinks = [
     { name: 'Home', path: '/' },
-    { name: 'Blogs', path: '/blog' },
+    { name: 'Blogs', path: '/blogs' },
     { name: 'About', path: '/about' },
     { name: 'Contact Us', path: '/contact' },
   ];
@@ -39,9 +39,12 @@ const Header = () => {
             })}
           </nav>
 
-          <button className="bg-white text-[#232536] font-bold px-6 py-2.5 rounded-md hover:bg-gray-100 transition-colors shrink-0">
+          <a
+            href="#footer"
+            className="bg-white text-[#232536] font-bold px-6 py-2.5 rounded-md hover:bg-gray-100 transition-colors shrink-0 text-center"
+          >
             Subscribe
-          </button>
+          </a>
         </div>
 
         <button
@@ -73,9 +76,13 @@ const Header = () => {
               </Link>
             );
           })}
-          <button className="bg-white text-[#232536] font-bold w-full py-3 rounded-md mt-2">
+          <a
+            href="#footer"
+            onClick={() => setIsOpen(false)}
+            className="bg-white text-[#232536] font-bold w-full py-3 rounded-md mt-2 text-center block"
+          >
             Subscribe
-          </button>
+          </a>
         </div>
       )}
     </header>
