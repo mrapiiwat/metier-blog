@@ -9,10 +9,10 @@ const NewTechnology = () => {
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <BlogCard title="A Review Of Cars..." img="/images/car.svg" />
-        <BlogCard title="A Deep Dive Into..." img="/images/car.svg" />
-        <BlogCard title="Reviewing Cars With..." img="/images/car.svg" />
-        <BlogCard title="Reviewing Cars With..." img="/images/car.svg" />
+        <BlogCard title="A Review Of Cars..." img="/images/home-hero.svg" />
+        <BlogCard title="A Deep Dive Into..." img="/images/home-hero.svg" />
+        <BlogCard title="Reviewing Cars With..." img="/images/home-hero.svg" />
+        <BlogCard title="Reviewing Cars With..." img="/images/home-hero.svg" />
       </div>
     </section>
   )

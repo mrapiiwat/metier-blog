@@ -6,7 +6,7 @@ const Hero = () => {
 
             <div className="absolute inset-0 -z-10">
                 <Image
-                    src="/images/car.svg"
+                    src="/images/home-hero.svg"
                     alt="Luxury car background"
                     fill
                     className="object-cover"
@@ -25,9 +25,9 @@ const Hero = () => {
                     Lorem ipsum dolor sit amet consectetur. Diam volutpat morbi elementum vel euismod aliquam.
                     Amet ultrices neque augue consectetur purus phasellus.
                 </p>
-                <button className="flex items-center gap-2 bg-[#FF5959] px-8 py-4 rounded-md font-bold text-white hover:bg-[#ff4646] transition-colors">
+                <a href="#footer" className="flex justify-center items-center gap-2 max-w-40 bg-[#FF5959] px-8 py-4 rounded-md font-bold text-white hover:bg-[#ff4646] transition-colors">
                     Subscribe
-                </button>
+                </a>
             </div>
 
         </section>

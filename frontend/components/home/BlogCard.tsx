@@ -24,7 +24,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ title, img }) => (
 
     <div className="flex items-center gap-3">
       <div className="w-10 h-10 bg-gray-300 rounded-full overflow-hidden shrink-0">
-        <Image src="/images/avatar-placeholder.png" alt="Author" width={40} height={40} />
+        <Image src="/images/avatar.png" alt="Author" width={40} height={40} />
       </div>
 
       <div className="text-sm">
