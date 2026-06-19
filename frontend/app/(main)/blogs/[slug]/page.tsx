@@ -9,7 +9,7 @@ import CommentList from '@/components/blog/CommentList'
 const BlogDetailPage = () => {
     const params = useParams()
     const router = useRouter()
-    const slug = params.slug
+    const slug = params.slug as string
 
     const [selectedImage, setSelectedImage] = useState<string | null>(null)
 
