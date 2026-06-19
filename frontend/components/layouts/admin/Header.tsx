@@ -11,9 +11,9 @@ const AdminHeader = () => {
   const router = useRouter();
 
   const navLinks = [
-    { name: 'Dashboard', path: '/dashboard' },
-    { name: 'Manage Blogs', path: '/blogs' },
-    { name: 'Manage Comments', path: '/comments' },
+    { name: 'Dashboard', path: 'dashboard' },
+    { name: 'Manage Blogs', path: 'blogs' },
+    { name: 'Manage Comments', path: 'comments' },
   ];
 
   const handleLogout = () => {
@@ -71,7 +71,6 @@ const AdminHeader = () => {
         </button>
       </div>
 
-      {/* Mobile Menu */}
       {isOpen && (
         <div className="absolute top-full left-0 w-full bg-[#1E202C] px-6 py-6 border-t border-gray-800 flex flex-col gap-5 md:hidden shadow-xl">
           {navLinks.map((link) => {
