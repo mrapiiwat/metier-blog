@@ -9,12 +9,18 @@ import {
   FiCalendar, FiHash, FiBold, FiItalic, FiList
 } from 'react-icons/fi'
 
+interface FormData {
+  title: string
+  slug: string
+  isPublished: boolean
+}
+
 const EditBlogPage = () => {
   const params = useParams()
   const router = useRouter()
   const blogId = params.id as string
 
-  const [formData, setFormData] = useState({ title: '', slug: '', isPublished: false })
+  const [formData, setFormData] = useState<FormData>({ title: '', slug: '', isPublished: false })
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [wordCount, setWordCount] = useState(0)
@@ -40,11 +46,11 @@ const EditBlogPage = () => {
 
   const handleSubmit = async () => {
     setIsSaving(true)
-    console.log("บันทึก:", { ...formData, content: editor?.getHTML() })
+    console.log("บันทึกข้อมูล:", { ...formData, content: editor?.getHTML() })
     setTimeout(() => { setIsSaving(false); router.push('/admin/blogs') }, 1000)
   }
 
-  if (isLoading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>
+  if (isLoading) return <div className="min-h-screen flex items-center justify-center text-gray-400">Loading...</div>
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans pb-10">
@@ -53,7 +59,8 @@ const EditBlogPage = () => {
           <Link href="/blogs" className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100"><FiArrowLeft size={17} /></Link>
           <h1 className="text-[15px] font-semibold">แก้ไขบทความ</h1>
         </div>
-        <button onClick={handleSubmit} className="px-4 py-2 bg-gray-900 text-white text-[13px] font-semibold rounded-lg">  {isSaving ? 'กำลังบันทึก...' : <>บันทึกการแก้ไข</>}
+        <button onClick={handleSubmit} className="px-4 py-2 bg-gray-900 text-white text-[13px] font-semibold rounded-lg">
+          {isSaving ? 'กำลังบันทึก...' : 'บันทึกการแก้ไข'}
         </button>
       </header>
 
@@ -64,14 +71,14 @@ const EditBlogPage = () => {
             <div className="p-5"><div className="w-full aspect-21/6 bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center text-gray-400 cursor-pointer hover:bg-gray-100"><FiImage size={24} /><p className="text-xs mt-2">อัปโหลดรูปหน้าปก</p></div></div>
           </div>
 
-          <div className="bg-white border border-gray-100 rounded-2xl p-6 space-y-4">
+          <div className="bg-white border border-gray-100 rounded-2xl p-6 space-y-5">
             <div>
-              <label className="text-[11px] font-bold text-gray-400 uppercase mb-2 block">ชื่อบทความ</label>
-              <input value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className="w-full text-xl font-bold focus:outline-none border-b border-gray-100 pb-1" />
+              <label className="text-[11px] font-bold text-gray-400 uppercase mb-2 block">ชื่อบทความ (Title)</label>
+              <input value={formData.title} onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))} className="w-full text-xl font-bold focus:outline-none border-b border-gray-100 pb-1" placeholder="ชื่อบทความ" />
             </div>
             <div>
               <label className="text-[11px] font-bold text-gray-400 uppercase mb-2 block">URL Slug</label>
-              <div className="flex items-center bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-sm"><span className="text-gray-400">/blogs/</span><input value={formData.slug} onChange={(e) => setFormData({ ...formData, slug: e.target.value })} className="bg-transparent focus:outline-none w-full" /></div>
+              <div className="flex items-center bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-sm"><span className="text-gray-400">/blogs/</span><input value={formData.slug} onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))} className="bg-transparent focus:outline-none w-full" /></div>
             </div>
           </div>
 
@@ -93,7 +100,7 @@ const EditBlogPage = () => {
         <aside className="flex flex-col gap-4">
           <div className="bg-white border border-gray-100 rounded-2xl p-5 space-y-4">
             <p className="text-[11px] font-bold text-gray-400 uppercase">สถานะ</p>
-            <select value={formData.isPublished ? 'true' : 'false'} onChange={(e) => setFormData({ ...formData, isPublished: e.target.value === 'true' })} className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-[13px]"><option value="true">เผยแพร่แล้ว</option><option value="false">ฉบับร่าง</option></select>
+            <select value={formData.isPublished ? 'true' : 'false'} onChange={(e) => setFormData(prev => ({ ...prev, isPublished: e.target.value === 'true' }))} className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-[13px]"><option value="true">เผยแพร่แล้ว</option><option value="false">ฉบับร่าง</option></select>
           </div>
           <div className="bg-white border border-gray-100 rounded-2xl p-5 text-[12px] space-y-3">
             <div className="flex justify-between"><span className="text-gray-400 flex items-center gap-2"><FiCalendar size={13} /> สร้างเมื่อ</span> <span className="font-semibold">1 มิ.ย. 2568</span></div>
