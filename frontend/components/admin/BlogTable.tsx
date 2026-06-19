@@ -50,7 +50,11 @@ const BlogTable: React.FC<BlogTableProps> = ({ blogs, onTogglePublish, onDelete 
                     </div>
                   </td>
                   <td className="px-7 py-5 text-gray-500 text-xs font-medium">
-                    {new Date(blog.date).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    {new Date(blog.date).toLocaleDateString('th-TH', {
+                      day: 'numeric',
+                      month: 'short',
+                      year: 'numeric',
+                    })}
                   </td>
                   <td className="px-7 py-5 text-gray-500 font-medium text-xs">
                     {blog.views.toLocaleString()} ครั้ง
@@ -59,27 +63,45 @@ const BlogTable: React.FC<BlogTableProps> = ({ blogs, onTogglePublish, onDelete 
                     <button
                       onClick={() => onTogglePublish(blog.id)}
                       className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border
-                        ${blog.isPublished 
-                          ? 'bg-emerald-50/50 text-emerald-600 border-emerald-100 hover:bg-emerald-100' 
-                          : 'bg-gray-50 text-gray-500 border-gray-200 hover:bg-gray-100'
+                        ${
+                          blog.isPublished
+                            ? 'bg-emerald-50/50 text-emerald-600 border-emerald-100 hover:bg-emerald-100'
+                            : 'bg-gray-50 text-gray-500 border-gray-200 hover:bg-gray-100'
                         }`}
                     >
                       <span className={`relative flex h-2 w-2`}>
-                        {blog.isPublished && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>}
-                        <span className={`relative inline-flex rounded-full h-2 w-2 ${blog.isPublished ? 'bg-emerald-500' : 'bg-gray-400'}`}></span>
+                        {blog.isPublished && (
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        )}
+                        <span
+                          className={`relative inline-flex rounded-full h-2 w-2 ${blog.isPublished ? 'bg-emerald-500' : 'bg-gray-400'}`}
+                        ></span>
                       </span>
                       {blog.isPublished ? 'Published' : 'Draft'}
                     </button>
                   </td>
                   <td className="px-7 py-5 text-right">
                     <div className="flex items-center justify-end gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Link href={`/blogs/${blog.slug}`} target="_blank" className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors" title="ดูบทความ">
+                      <Link
+                        href={`/blogs/${blog.slug}`}
+                        target="_blank"
+                        className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors"
+                        title="ดูบทความ"
+                      >
                         <FiEye size={16} />
                       </Link>
-                      <Link href={`blogs/edit/${blog.id}`} className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-colors" title="แก้ไข">
+                      <Link
+                        href={`blogs/edit/${blog.id}`}
+                        className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-colors"
+                        title="แก้ไข"
+                      >
                         <FiEdit2 size={16} />
                       </Link>
-                      <button onClick={() => onDelete(blog.id)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors cursor-pointer" title="ลบ">
+                      <button
+                        onClick={() => onDelete(blog.id)}
+                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors cursor-pointer"
+                        title="ลบ"
+                      >
                         <FiTrash2 size={16} />
                       </button>
                     </div>
@@ -90,13 +112,21 @@ const BlogTable: React.FC<BlogTableProps> = ({ blogs, onTogglePublish, onDelete 
           </tbody>
         </table>
       </div>
-      
+
       <div className="px-7 py-4 border-t border-gray-50 flex items-center justify-between bg-gray-50/30">
-        <span className="text-xs text-gray-500 font-medium">แสดง 1 ถึง {blogs.length} จาก {blogs.length} รายการ</span>
+        <span className="text-xs text-gray-500 font-medium">
+          แสดง 1 ถึง {blogs.length} จาก {blogs.length} รายการ
+        </span>
         <div className="flex items-center gap-2">
-          <button className="px-3 py-1.5 text-xs font-bold text-gray-400 bg-white border border-gray-200 rounded-lg cursor-not-allowed">ก่อนหน้า</button>
-          <button className="px-3 py-1.5 text-xs font-bold text-white bg-indigo-600 rounded-lg">1</button>
-          <button className="px-3 py-1.5 text-xs font-bold text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">ถัดไป</button>
+          <button className="px-3 py-1.5 text-xs font-bold text-gray-400 bg-white border border-gray-200 rounded-lg cursor-not-allowed">
+            ก่อนหน้า
+          </button>
+          <button className="px-3 py-1.5 text-xs font-bold text-white bg-indigo-600 rounded-lg">
+            1
+          </button>
+          <button className="px-3 py-1.5 text-xs font-bold text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">
+            ถัดไป
+          </button>
         </div>
       </div>
     </div>

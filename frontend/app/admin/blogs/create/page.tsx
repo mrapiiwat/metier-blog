@@ -23,24 +23,41 @@ const CreateBlogPage = () => {
     onUpdate: ({ editor }) => {
       const text = editor.getText()
       setWordCount(text.split(/\s+/).filter(Boolean).length)
-    }
+    },
   })
 
   const handleSubmit = async () => {
     setIsSaving(true)
-    console.log("บันทึก:", { ...formData, content: editor?.getHTML() })
-    setTimeout(() => { setIsSaving(false); router.push('/admin/blogs') }, 1000)
+    console.log('บันทึก:', { ...formData, content: editor?.getHTML() })
+    setTimeout(() => {
+      setIsSaving(false)
+      router.push('/admin/blogs')
+    }, 1000)
   }
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans pb-20">
       <header className="bg-white border-b border-gray-100 sticky top-0 z-10 h-14 flex items-center px-6 justify-between">
         <div className="flex items-center gap-3">
-          <Link href="/admin/blogs" className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100"><FiArrowLeft size={17} /></Link>
+          <Link
+            href="/admin/blogs"
+            className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100"
+          >
+            <FiArrowLeft size={17} />
+          </Link>
           <h1 className="text-[15px] font-semibold">สร้างบทความใหม่</h1>
         </div>
-        <button onClick={handleSubmit} className="px-5 py-2 bg-indigo-600 text-white text-[13px] font-bold rounded-lg flex items-center gap-2">
-          {isSaving ? 'กำลังสร้าง...' : <><FiPlus size={14} /> ยืนยันการสร้าง</>}
+        <button
+          onClick={handleSubmit}
+          className="px-5 py-2 bg-indigo-600 text-white text-[13px] font-bold rounded-lg flex items-center gap-2"
+        >
+          {isSaving ? (
+            'กำลังสร้าง...'
+          ) : (
+            <>
+              <FiPlus size={14} /> ยืนยันการสร้าง
+            </>
+          )}
         </button>
       </header>
 

@@ -12,9 +12,7 @@ const Pagination = () => {
           <button
             key={page}
             className={`w-10 h-10 rounded-md transition-all ${
-              page === 1 
-              ? 'bg-[#FF5959] text-white font-bold' 
-              : 'hover:bg-gray-100'
+              page === 1 ? 'bg-[#FF5959] text-white font-bold' : 'hover:bg-gray-100'
             }`}
           >
             {page}
