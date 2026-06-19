@@ -1,0 +1,122 @@
+'use client'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { IoArrowBackSharp } from 'react-icons/io5'
+import { MdAdminPanelSettings } from "react-icons/md";
+
+const Login = () => {
+    const router = useRouter()
+    const [email, setEmail] = useState('')
+    const [password, setPassword] = useState('')
+    const [error, setError] = useState('')
+    const [isLoading, setIsLoading] = useState(false)
+
+    const handleLogin = async (e: React.FormEvent) => {
+        e.preventDefault()
+        setError('')
+
+        if (!email.trim() || !password.trim()) {
+            setError('กรุณากรอกอีเมลและรหัสผ่านให้ครบถ้วน')
+            return
+        }
+
+        setIsLoading(true)
+
+        setTimeout(() => {
+            if (email === 'admin@admin.com' && password === 'password') {
+                router.push('/dashboard')
+            } else {
+                setError('อีเมลหรือรหัสผ่านไม่ถูกต้อง (ทดสอบใช้: admin@admin.com / password)')
+                setIsLoading(false)
+            }
+        }, 800)
+    }
+
+    return (
+        <div className="min-h-screen flex flex-col justify-center items-center bg-gray-50/50 p-4 sm:p-6 font-sans relative">
+
+            <div className="absolute top-6 left-6 sm:top-10 sm:left-10">
+                <Link
+                    href="/"
+                    className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 font-medium transition-all"
+                >
+                    <IoArrowBackSharp size={18} />
+                    <span>กลับหน้าเว็บไซต์</span>
+                </Link>
+            </div>
+
+            <div className="w-full max-w-100 bg-white border border-gray-100 rounded-3xl shadow-xs p-8 sm:p-10">
+
+                <div className="text-center mb-8">
+                    <div className='flex justify-center'>
+                        <MdAdminPanelSettings size={50} />
+                    </div>
+
+                    <h1 className="text-2xl font-black text-gray-900 tracking-tight">Admin Portal</h1>
+                    <p className="text-sm text-gray-400 mt-1.5">เข้าสู่ระบบเพื่อจัดการเนื้อหาเว็บไซต์</p>
+                </div>
+
+                <form onSubmit={handleLogin} className="space-y-5">
+
+                    <div className="space-y-1.5">
+                        <label htmlFor="email" className="text-sm font-bold text-gray-800">อีเมลแอดมิน</label>
+                        <input
+                            type="email"
+                            id="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder="admin@example.com"
+                            className="w-full text-sm px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-hidden focus:border-gray-900 focus:bg-white transition-all"
+                            required
+                        />
+                    </div>
+
+                    <div className="space-y-1.5">
+                        <div className="flex items-center justify-between">
+                            <label htmlFor="password" className="text-sm font-bold text-gray-800">รหัสผ่าน</label>
+                        </div>
+                        <input
+                            type="password"
+                            id="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            placeholder="••••••••"
+                            className="w-full text-sm px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-hidden focus:border-gray-900 focus:bg-white transition-all"
+                            required
+                        />
+                    </div>
+
+                    {error && (
+                        <div className="p-3 bg-red-50 border border-red-100 rounded-xl">
+                            <p className="text-xs font-medium text-red-600 text-center">{error}</p>
+                        </div>
+                    )}
+
+                    <button
+                        type="submit"
+                        disabled={isLoading}
+                        className={`w-full py-3 mt-2 text-white text-sm font-bold rounded-xl transition-all shadow-xs flex justify-center items-center gap-2
+                            ${isLoading
+                                ? 'bg-gray-400 cursor-not-allowed'
+                                : 'bg-gray-900 hover:bg-gray-800 cursor-pointer active:scale-[0.98]'
+                            }`}
+                    >
+                        {isLoading ? (
+                            <>
+                                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                                กำลังเข้าสู่ระบบ...
+                            </>
+                        ) : (
+                            'เข้าสู่ระบบ'
+                        )}
+                    </button>
+                </form>
+
+            </div>
+
+        </div>
+    )
+}
+
+export default Login
