@@ -12,7 +12,8 @@ export const blogController = new Elysia({ prefix: "/blog", tags: ["BLOG"] })
 		"/",
 		async ({ query, set }) => {
 			const page = query.page || 1;
-			const response = await blogService.getBlogs(page);
+			const search = query.search;
+			const response = await blogService.getBlogs(page, search);
 
 			set.status = StatusCodes.OK;
 

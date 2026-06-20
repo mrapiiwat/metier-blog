@@ -121,6 +121,9 @@ export class BlogService {
 			offset: offset,
 			orderBy: [desc(blogs.createdAt)],
 			where: whereCondition,
+			columns: {
+				additionalImages: false,
+			},
 			with: {
 				admin: {
 					columns: {
