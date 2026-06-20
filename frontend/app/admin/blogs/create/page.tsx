@@ -8,10 +8,16 @@ import { FiArrowLeft, FiPlus } from 'react-icons/fi'
 import { BlogForm } from '@/components/admin/BlogForm'
 import { GalleryUploader } from '@/components/admin/GalleryUploader'
 import { Sidebar } from '@/components/admin/Sidebar'
+import { CoverUploader } from '@/components/admin/CoverUploader'
 
 const CreateBlogPage = () => {
   const router = useRouter()
-  const [formData, setFormData] = useState({ title: '', slug: '', isPublished: false })
+  const [formData, setFormData] = useState({
+    title: '',
+    slug: '',
+    isPublished: false,
+    coverImage: null as File | null,
+  })
   const [isSaving, setIsSaving] = useState(false)
   const [wordCount, setWordCount] = useState(0)
 
@@ -28,7 +34,19 @@ const CreateBlogPage = () => {
 
   const handleSubmit = async () => {
     setIsSaving(true)
-    console.log('บันทึก:', { ...formData, content: editor?.getHTML() })
+
+    // สร้าง FormData เพื่อส่งไฟล์และข้อมูลพร้อมกัน
+    const data = new FormData()
+    data.append('title', formData.title)
+    data.append('slug', formData.slug)
+    data.append('isPublished', String(formData.isPublished))
+    data.append('content', editor?.getHTML() || '')
+    if (formData.coverImage) {
+      data.append('coverImage', formData.coverImage)
+    }
+
+    console.log('กำลังบันทึกข้อมูล:', { ...formData, content: editor?.getHTML() })
+
     setTimeout(() => {
       setIsSaving(false)
       router.push('/admin/blogs')
@@ -63,6 +81,12 @@ const CreateBlogPage = () => {
 
       <main className="max-w-275 mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-[1fr_272px] gap-6 items-start">
         <div className="flex flex-col gap-5">
+          {/* เพิ่มส่วนอัปโหลดรูปหน้าปก */}
+          <CoverUploader
+            coverImage={formData.coverImage}
+            setCoverImage={(file) => setFormData((prev) => ({ ...prev, coverImage: file }))}
+          />
+
           <BlogForm formData={formData} setFormData={setFormData} editor={editor} />
           <GalleryUploader />
         </div>

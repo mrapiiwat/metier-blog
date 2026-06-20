@@ -2,16 +2,19 @@
 import React from 'react'
 import { Editor, EditorContent } from '@tiptap/react'
 import { FiBold, FiItalic, FiList } from 'react-icons/fi'
+// import type { BlogFormData } from '@/types/blog' // แนะนำให้ใช้แบบนี้ในอนาคต
 
-interface FormData {
+// แก้ตรงนี้ครับ: เพิ่ม coverImage เข้าไปให้ตรงกับในหน้าหลัก
+interface BlogFormData {
   title: string
   slug: string
   isPublished: boolean
+  coverImage: File | null
 }
 
 interface BlogFormProps {
-  formData: FormData
-  setFormData: React.Dispatch<React.SetStateAction<FormData>>
+  formData: BlogFormData
+  setFormData: React.Dispatch<React.SetStateAction<BlogFormData>>
   editor: Editor | null
 }
 

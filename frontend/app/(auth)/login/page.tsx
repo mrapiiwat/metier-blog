@@ -22,7 +22,6 @@ const Login = () => {
     }
   }, [token, user, router])
 
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
@@ -118,10 +117,11 @@ const Login = () => {
             type="submit"
             disabled={isLoading}
             className={`w-full py-3 mt-2 text-white text-sm font-bold rounded-xl transition-all shadow-xs flex justify-center items-center gap-2
-                            ${isLoading
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-gray-900 hover:bg-gray-800 cursor-pointer active:scale-[0.98]'
-              }`}
+                            ${
+                              isLoading
+                                ? 'bg-gray-400 cursor-not-allowed'
+                                : 'bg-gray-900 hover:bg-gray-800 cursor-pointer active:scale-[0.98]'
+                            }`}
           >
             {isLoading ? (
               <>
