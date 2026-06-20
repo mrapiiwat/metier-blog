@@ -4,11 +4,13 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import Logo from '../../Logo'
 import { FiLogOut } from 'react-icons/fi'
+import useAuthStore from '@/store/authStore'
 
 const AdminHeader = () => {
   const [isOpen, setIsOpen] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
+  const { actionLogout } = useAuthStore()
 
   const navLinks = [
     { name: 'Dashboard', path: '/admin/dashboard' },
@@ -16,8 +18,8 @@ const AdminHeader = () => {
     { name: 'Manage Comments', path: '/admin/comments' },
   ]
 
-  const handleLogout = () => {
-    alert('ออกจากระบบเรียบร้อย')
+  const handleLogout = async () => {
+    await actionLogout()
     router.push('/login')
   }
 

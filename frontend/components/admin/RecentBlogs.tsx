@@ -2,8 +2,8 @@ import React from 'react'
 import Link from 'next/link'
 import { FiEdit2 } from 'react-icons/fi'
 
-interface BlogItem {
-  id: number
+export interface BlogItem {
+  id: string
   title: string
   slug: string
   date: string
@@ -12,7 +12,7 @@ interface BlogItem {
 
 interface RecentBlogsProps {
   blogs: BlogItem[]
-  onTogglePublish: (id: number) => void
+  onTogglePublish: (id: string) => void
 }
 
 const RecentBlogs: React.FC<RecentBlogsProps> = ({ blogs, onTogglePublish }) => {
@@ -42,53 +42,63 @@ const RecentBlogs: React.FC<RecentBlogsProps> = ({ blogs, onTogglePublish }) => 
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50 text-sm">
-            {blogs.map((blog) => (
-              <tr key={blog.id} className="hover:bg-gray-50/80 transition-colors group">
-                <td className="px-7 py-5 font-bold text-gray-900 w-1/2">
-                  <div className="line-clamp-1 group-hover:text-indigo-600 transition-colors">
-                    {blog.title}
-                  </div>
-                </td>
-                <td className="px-7 py-5 text-gray-400 font-medium text-xs">
-                  {new Date(blog.date).toLocaleDateString('th-TH', {
-                    day: 'numeric',
-                    month: 'short',
-                    year: 'numeric',
-                  })}
-                </td>
-                <td className="px-7 py-5">
-                  <button
-                    onClick={() => onTogglePublish(blog.id)}
-                    className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border
-                      ${
-                        blog.isPublished
-                          ? 'bg-emerald-50/50 text-emerald-600 border-emerald-100 hover:bg-emerald-100'
-                          : 'bg-gray-50 text-gray-500 border-gray-200 hover:bg-gray-100'
-                      }`}
-                  >
-                    <span className={`relative flex h-2 w-2`}>
-                      {blog.isPublished && (
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                      )}
-                      <span
-                        className={`relative inline-flex rounded-full h-2 w-2 ${blog.isPublished ? 'bg-emerald-500' : 'bg-gray-400'}`}
-                      ></span>
-                    </span>
-                    {blog.isPublished ? 'เผยแพร่แล้ว' : 'ฉบับร่าง'}
-                  </button>
-                </td>
-                <td className="px-7 py-5 text-right">
-                  <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Link
-                      href={`blogs/edit/${blog.id}`}
-                      className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-colors"
-                    >
-                      <FiEdit2 size={16} />
-                    </Link>
-                  </div>
+            {blogs.length === 0 ? (
+              <tr>
+                <td colSpan={4} className="px-7 py-10 text-center text-gray-400">
+                  ยังไม่มีบทความ
                 </td>
               </tr>
-            ))}
+            ) : (
+              blogs.map((blog) => (
+                <tr key={blog.id} className="hover:bg-gray-50/80 transition-colors group">
+                  <td className="px-7 py-5 font-bold text-gray-900 w-1/2">
+                    <div className="line-clamp-1 group-hover:text-indigo-600 transition-colors">
+                      {blog.title}
+                    </div>
+                  </td>
+                  <td className="px-7 py-5 text-gray-400 font-medium text-xs">
+                    {blog.date
+                      ? new Date(blog.date).toLocaleDateString('th-TH', {
+                          day: 'numeric',
+                          month: 'short',
+                          year: 'numeric',
+                        })
+                      : '-'}
+                  </td>
+                  <td className="px-7 py-5">
+                    <button
+                      onClick={() => onTogglePublish(blog.id)}
+                      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border
+                        ${
+                          blog.isPublished
+                            ? 'bg-emerald-50/50 text-emerald-600 border-emerald-100 hover:bg-emerald-100'
+                            : 'bg-gray-50 text-gray-500 border-gray-200 hover:bg-gray-100'
+                        }`}
+                    >
+                      <span className={`relative flex h-2 w-2`}>
+                        {blog.isPublished && (
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        )}
+                        <span
+                          className={`relative inline-flex rounded-full h-2 w-2 ${blog.isPublished ? 'bg-emerald-500' : 'bg-gray-400'}`}
+                        ></span>
+                      </span>
+                      {blog.isPublished ? 'เผยแพร่แล้ว' : 'ฉบับร่าง'}
+                    </button>
+                  </td>
+                  <td className="px-7 py-5 text-right">
+                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Link
+                        href={`blogs/edit/${blog.id}`}
+                        className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-colors"
+                      >
+                        <FiEdit2 size={16} />
+                      </Link>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

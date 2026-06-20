@@ -14,21 +14,28 @@ export const userController = new Elysia({ tags: ["USER"] })
 			},
 		},
 		(app) =>
-			app.get(
-				"/me",
-				async ({ user, set }) => {
-					const userId = String(user.id);
-					const response = userService.me(userId);
+			app
+				.get(
+					"/me",
+					async ({ user, set }) => {
+						const userId = String(user.id);
+						const response = userService.me(userId);
 
-					set.status = StatusCodes.OK;
+						set.status = StatusCodes.OK;
 
-					return response;
-				},
-				{
-					detail: {
-						summary: "ดึงข้อมูลส่วนตัวของผู้ใช้งาน",
-						description: "ดึงข้อมูลโปรไฟล์ของผู้ใช้งานที่กำลังเข้าสู่ระบบอยู่",
+						return response;
 					},
-				},
-			),
+					{
+						detail: {
+							summary: "ดึงข้อมูลส่วนตัวของผู้ใช้งาน",
+							description: "ดึงข้อมูลโปรไฟล์ของผู้ใช้งานที่กำลังเข้าสู่ระบบอยู่",
+						},
+					},
+				)
+				.get("/dash", async ({ set }) => {
+					const response = userService.getStats()
+
+					set.status = StatusCodes.OK
+					return response
+				})
 	);

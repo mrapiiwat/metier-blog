@@ -3,13 +3,13 @@ import Link from 'next/link'
 import { FiCheck, FiX, FiClock } from 'react-icons/fi'
 import { BsStars } from 'react-icons/bs'
 
-interface AIAnalysis {
+export interface AIAnalysis {
   status: 'approve' | 'reject' | 'flagged' | 'pending'
   message: string
 }
 
-interface CommentItem {
-  id: number
+export interface CommentItem {
+  id: string
   author: string
   content: string
   blogTitle: string
@@ -18,8 +18,8 @@ interface CommentItem {
 
 interface RecentCommentsProps {
   comments: CommentItem[]
-  onApprove: (id: number) => void
-  onReject: (id: number) => void
+  onApprove: (id: string) => void
+  onReject: (id: string) => void
 }
 
 const aiStatusColors = {
@@ -63,7 +63,7 @@ const RecentComments: React.FC<RecentCommentsProps> = ({ comments, onApprove, on
                 <div className="space-y-1.5 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
                     <div className="w-7 h-7 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold text-xs shrink-0">
-                      {comment.author.charAt(0)}
+                      {comment.author ? comment.author.charAt(0).toUpperCase() : 'U'}
                     </div>
                     <span className="font-bold text-sm text-gray-900">{comment.author}</span>
 

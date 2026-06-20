@@ -1,97 +1,155 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { FiFileText, FiMessageSquare, FiPlus, FiCheckCircle } from 'react-icons/fi'
 import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import StatCard from '@/components/admin/StatCard'
 import RecentBlogs from '@/components/admin/RecentBlogs'
 import RecentComments from '@/components/admin/RecentComments'
+import axios from '@/lib/axios/admin'
 
-interface AIAnalysis {
+interface DashboardStats {
+  totalArticles: number
+  publishedArticles: number
+  pendingComments: number
+}
+
+export interface BlogItem {
+  id: string
+  title: string
+  slug: string
+  date: string
+  isPublished: boolean
+}
+
+export interface AIAnalysis {
   status: 'approve' | 'reject' | 'flagged' | 'pending'
   message: string
 }
 
-interface CommentItem {
-  id: number
+export interface CommentItem {
+  id: string
   author: string
   content: string
   blogTitle: string
   aiAnalysis: AIAnalysis
 }
 
+interface APIBlogData {
+  id: string
+  title: string
+  slug: string
+  createdAt: string
+  isPublished: boolean
+}
+
+interface APICommentData {
+  id: string
+  blogId: string
+  senderName: string
+  message: string
+  aiSuggestion: 'approve' | 'reject' | 'flagged' | 'pending'
+  aiReason: string
+}
+
 const Dashboard = () => {
-  const [blogs, setBlogs] = useState([
-    {
-      id: 1,
-      title: 'Classic Revival: Revisiting Iconic Cars',
-      slug: 'classic-revival',
-      date: '2026-06-18',
-      isPublished: true,
-    },
-    {
-      id: 2,
-      title: 'The Future of Electric Vehicles Strategy',
-      slug: 'future-ev',
-      date: '2026-06-15',
-      isPublished: false,
-    },
-    {
-      id: 3,
-      title: 'Top 10 Maintenance Tips for Old Cars',
-      slug: 'maintenance-tips',
-      date: '2026-06-10',
-      isPublished: true,
-    },
-    {
-      id: 4,
-      title: 'Why 90s JDM Cars Are Increasing In Value',
-      slug: '90s-jdm',
-      date: '2026-06-08',
-      isPublished: true,
-    },
-  ])
+  const [stats, setStats] = useState<DashboardStats>({
+    totalArticles: 0,
+    publishedArticles: 0,
+    pendingComments: 0,
+  })
 
-  const [pendingComments, setPendingComments] = useState<CommentItem[]>([
-    {
-      id: 1,
-      author: 'สมชาย ใจดี',
-      content: 'บทความเขียนดีมากเลยครับ อ่านเพลินมาก 10 10 10',
-      blogTitle: 'Classic Revival',
-      aiAnalysis: { status: 'approve', message: 'ปลอดภัย (ภาษาไทย/ตัวเลข)' },
-    },
-    {
-      id: 2,
-      author: 'John Doe',
-      content: 'Great article! Please check out my website for more info.',
-      blogTitle: 'Classic Revival',
-      aiAnalysis: { status: 'reject', message: 'พบภาษาอังกฤษและสแปม' },
-    },
-    {
-      id: 3,
-      author: 'วัยรุ่น สร้างตัว',
-      content: 'สุดยอดไปเลยควัฟพรี่ สนใจคริปโตทักแชทนะคับ',
-      blogTitle: 'The Future of Electric Vehicles',
-      aiAnalysis: { status: 'flagged', message: 'เตือน: อาจเป็นโฆษณาแฝง' },
-    },
-    {
-      id: 4,
-      author: 'ระบบอัตโนมัติ',
-      content: 'กำลังประมวลผลข้อความนี้...',
-      blogTitle: 'Top 10 Maintenance Tips',
-      aiAnalysis: { status: 'pending', message: 'AI กำลังประมวลผล...' },
-    },
-  ])
+  const [blogs, setBlogs] = useState<BlogItem[]>([])
+  const [pendingComments, setPendingComments] = useState<CommentItem[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
-  const handleTogglePublish = (id: number) => {
-    setBlogs(blogs.map((b) => (b.id === id ? { ...b, isPublished: !b.isPublished } : b)))
+  const fetchDashboardData = useCallback(async () => {
+    try {
+      await Promise.resolve()
+      setIsLoading(true)
+
+      const [statsRes, blogsRes, commentsRes] = await Promise.all([
+        axios.get<DashboardStats>('/dash'),
+        axios.get('/blog', { params: { limit: 5 } }),
+        axios.get('/comment', { params: { status: 'pending', limit: 5 } }),
+      ])
+
+      setStats(statsRes.data)
+
+      const blogsList = blogsRes.data?.data || blogsRes.data || []
+      const mappedBlogs: BlogItem[] = blogsList.map((b: APIBlogData) => ({
+        id: b.id,
+        title: b.title,
+        slug: b.slug,
+        date: b.createdAt ? b.createdAt.split('T')[0] : '',
+        isPublished: b.isPublished,
+      }))
+      setBlogs(mappedBlogs)
+
+      const commentsList = commentsRes.data?.data || commentsRes.data || []
+      const mappedComments: CommentItem[] = commentsList.map((c: APICommentData) => ({
+        id: c.id,
+        author: c.senderName,
+        content: c.message,
+        blogTitle: `Blog ID: ${c.blogId.split('-')[0]}...`,
+        aiAnalysis: {
+          status: c.aiSuggestion || 'pending',
+          message: c.aiReason || 'รอการตรวจสอบโดย AI',
+        },
+      }))
+      setPendingComments(mappedComments)
+    } catch (error) {
+      console.error('Failed to load dashboard data:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchDashboardData()
+  }, [fetchDashboardData])
+
+  const handleTogglePublish = async (id: string) => {
+    const targetBlog = blogs.find((b) => b.id === id)
+    if (!targetBlog) return
+
+    const newStatus = !targetBlog.isPublished
+
+    setBlogs(blogs.map((b) => (b.id === id ? { ...b, isPublished: newStatus } : b)))
+
+    try {
+      await axios.put(`/blog/${id}`, { isPublished: newStatus })
+
+      fetchDashboardData()
+    } catch (error) {
+      console.error('Failed to toggle publish status', error)
+      alert('เกิดข้อผิดพลาดในการเปลี่ยนสถานะบทความ')
+      fetchDashboardData()
+    }
   }
 
-  const handleApproveComment = (id: number) => {
+  const handleApproveComment = async (id: string) => {
     setPendingComments(pendingComments.filter((c) => c.id !== id))
+
+    try {
+      await axios.put(`/comment/${id}/status`, { status: 'approved' })
+      fetchDashboardData()
+    } catch (error) {
+      console.error('Failed to approve comment', error)
+      fetchDashboardData()
+    }
   }
 
-  const handleRejectComment = (id: number) => {
+  const handleRejectComment = async (id: string) => {
     setPendingComments(pendingComments.filter((c) => c.id !== id))
+
+    try {
+      await axios.put(`/comment/${id}/status`, { status: 'rejected' })
+      fetchDashboardData()
+    } catch (error) {
+      console.error('Failed to reject comment', error)
+      fetchDashboardData()
+    }
   }
 
   return (
@@ -108,21 +166,21 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           <StatCard
             title="Total Articles"
-            value={blogs.length}
+            value={isLoading ? '...' : stats.totalArticles}
             icon={<FiFileText size={24} />}
-            trend="12%"
+            trend="ทั้งหมด"
             trendUp={true}
           />
           <StatCard
             title="Published"
-            value={blogs.filter((b) => b.isPublished).length}
+            value={isLoading ? '...' : stats.publishedArticles}
             icon={<FiCheckCircle size={24} className="text-emerald-500" />}
           />
           <StatCard
             title="Pending AI Review"
-            value={pendingComments.length}
+            value={isLoading ? '...' : stats.pendingComments}
             icon={<FiMessageSquare size={24} className="text-indigo-500" />}
-            trend="5 รายการล่าสุด"
+            trend="รอการตรวจสอบ"
             trendUp={false}
           />
         </div>
