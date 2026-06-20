@@ -10,7 +10,8 @@ const queryClient = postgres(DB_URL);
 
 async function seed() {
 	const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin";
-	const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "123";
+	const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "123456789";
+	const ADMIN_NAME = process.env.ADMIN_NAME || "Unknown";
 
 	const passwordHash = await bcrypt.hash(ADMIN_PASSWORD, 12);
 
@@ -19,11 +20,15 @@ async function seed() {
 			.insert(admins)
 			.values({
 				username: ADMIN_USERNAME,
+				name: ADMIN_NAME,
 				passwordHash: passwordHash,
 			})
 			.onConflictDoUpdate({
 				target: admins.username,
-				set: { passwordHash: passwordHash },
+				set: {
+					name: ADMIN_NAME,
+					passwordHash: passwordHash,
+				},
 			});
 	} catch (err) {
 		console.error("Error seeding:", err);

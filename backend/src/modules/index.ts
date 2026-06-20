@@ -1,5 +1,6 @@
 import { Elysia } from "elysia";
 import { authController } from "./auth/auth.controller";
+import { blogController } from "./blog/blog.controller";
 import { userController } from "./user/user.controller";
 
 const modules = new Elysia({ prefix: "/api" })
@@ -7,6 +8,7 @@ const modules = new Elysia({ prefix: "/api" })
 		return "pong";
 	})
 	.use(authController)
+	.use(blogController)
 	.use(userController);
 
 export default modules;

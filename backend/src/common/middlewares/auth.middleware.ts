@@ -3,10 +3,7 @@ import { UnauthorizedError } from "@/common/exceptions";
 import { jwt } from "@/common/plugins/jwt";
 
 export interface JwtPayload {
-	id: number | string;
-	provider: "local" | "google" | "facebook";
-	iat?: number;
-	exp?: number;
+	id: string;
 }
 
 export const authenticateJWT = (app: Elysia) =>

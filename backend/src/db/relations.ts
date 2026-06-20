@@ -10,6 +10,7 @@ export const refreshTokensRelations = relations(refreshTokens, ({ one }) => ({
 
 export const adminsRelations = relations(admins, ({ many }) => ({
 	refreshTokens: many(refreshTokens),
+	blogs: many(blogs),
 }));
 
 export const commentsRelations = relations(comments, ({ one }) => ({
@@ -19,6 +20,10 @@ export const commentsRelations = relations(comments, ({ one }) => ({
 	}),
 }));
 
-export const blogsRelations = relations(blogs, ({ many }) => ({
+export const blogsRelations = relations(blogs, ({ many, one }) => ({
+	admin: one(admins, {
+		fields: [blogs.adminId],
+		references: [admins.id],
+	}),
 	comments: many(comments),
 }));

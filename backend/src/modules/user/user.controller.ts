@@ -18,11 +18,11 @@ export const userController = new Elysia({ tags: ["USER"] })
 				"/me",
 				async ({ user, set }) => {
 					const userId = String(user.id);
-					const result = userService.me(userId);
+					const response = userService.me(userId);
 
 					set.status = StatusCodes.OK;
 
-					return result;
+					return response;
 				},
 				{
 					detail: {

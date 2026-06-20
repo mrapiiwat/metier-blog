@@ -8,6 +8,11 @@ const swaggerConfig = swagger({
 			version: "1.0.0",
 			description: "API Documentation สำหรับระบบ Blog",
 		},
+		tags: [
+			{ name: "AUTH", description: "ระบบจัดการการยืนยันตัวตนและการเข้าสู่ระบบ" },
+			{ name: "USER", description: "ระบบจัดการข้อมูลผู้ใช้งาน" },
+			{ name: "BLOG", description: "ระบบจัดการบทความและเนื้อหา" },
+		],
 		components: {
 			securitySchemes: {
 				JwtAuth: {

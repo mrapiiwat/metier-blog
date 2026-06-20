@@ -4,6 +4,7 @@ CREATE TYPE ai_recommendation AS ENUM ('approve', 'reject', 'flagged', 'pending'
 CREATE TABLE admins (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     username VARCHAR(100) UNIQUE NOT NULL,
+    name VARCHAR(255) NOT NULL,
     password_hash TEXT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -23,9 +24,9 @@ CREATE INDEX idx_refresh_tokens_admin_id ON refresh_tokens (admin_id);
 
 CREATE TABLE blogs (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    admin_id UUID NOT NULL REFERENCES admins(id) ON DELETE CASCADE,
     slug VARCHAR(255) UNIQUE NOT NULL,
     title VARCHAR(255) NOT NULL,
-    summary TEXT NOT NULL,
     content TEXT NOT NULL,
     cover_image TEXT NOT NULL,             
     additional_images TEXT[] DEFAULT '{}', 
@@ -36,6 +37,7 @@ CREATE TABLE blogs (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+CREATE INDEX idx_blogs_admin_id ON blogs (admin_id);
 CREATE INDEX idx_blogs_title ON blogs (title);
 CREATE INDEX idx_blogs_is_published ON blogs (is_published);
 CREATE INDEX idx_blogs_published_at ON blogs (published_at DESC);

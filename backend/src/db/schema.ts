@@ -23,6 +23,7 @@ export const admins = pgTable(
 	{
 		id: uuid().defaultRandom().primaryKey().notNull(),
 		username: varchar({ length: 100 }).notNull(),
+		name: varchar({ length: 255 }).notNull(),
 		passwordHash: text("password_hash").notNull(),
 		createdAt: timestamp("created_at", {
 			withTimezone: true,
@@ -74,9 +75,9 @@ export const blogs = pgTable(
 	"blogs",
 	{
 		id: uuid().defaultRandom().primaryKey().notNull(),
+		adminId: uuid("admin_id").notNull(),
 		slug: varchar({ length: 255 }).notNull(),
 		title: varchar({ length: 255 }).notNull(),
-		summary: text().notNull(),
 		content: text().notNull(),
 		coverImage: text("cover_image").notNull(),
 		additionalImages: text("additional_images").array().default([""]),
@@ -96,6 +97,10 @@ export const blogs = pgTable(
 		}).defaultNow(),
 	},
 	(table) => [
+		index("idx_blogs_admin_id").using(
+			"btree",
+			table.adminId.asc().nullsLast().op("uuid_ops"),
+		),
 		index("idx_blogs_is_published").using(
 			"btree",
 			table.isPublished.asc().nullsLast().op("bool_ops"),

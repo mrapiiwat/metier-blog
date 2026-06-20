@@ -13,11 +13,11 @@ export const authController = new Elysia({ tags: ["AUTH"] })
 	.post(
 		"/login",
 		async ({ body, set, jwt, cookie: { refreshToken } }) => {
-			const result = await authService.login(body);
+			const response = await authService.login(body);
 			const accessToken = await jwt.sign({
-				id: result.userId,
+				id: response.userId,
 			});
-			const refreshRaw = await createRefreshToken(result.userId);
+			const refreshRaw = await createRefreshToken(response.userId);
 			refreshToken.set({
 				value: refreshRaw,
 				httpOnly: true,

@@ -26,7 +26,7 @@ export class AuthService {
 			users.passwordHash,
 		);
 		if (!isPasswordValid) {
-			throw new UnauthorizedError("email or password is incorrect");
+			throw new UnauthorizedError("username or password is incorrect");
 		}
 
 		return { userId: users.id };
