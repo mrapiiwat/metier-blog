@@ -25,7 +25,7 @@ const BlogSearch: React.FC<BlogSearchProps> = ({
           <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
           <input
             type="text"
-            placeholder="ค้นหาจากชื่อบทความ หรือ Slug..."
+            placeholder="ค้นหาจากชื่อบทความ"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-11 pr-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:bg-white transition-all"

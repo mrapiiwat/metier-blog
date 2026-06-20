@@ -1,4 +1,5 @@
-import { useRef, useState } from 'react'
+'use client'
+import { useRef } from 'react'
 import { FiImage } from 'react-icons/fi'
 import Image from 'next/image'
 
@@ -7,15 +8,19 @@ interface Props {
   setCoverImage: (file: File | null) => void
 }
 
-export const CoverUploader = ({ setCoverImage }: Props) => {
+export const CoverUploader = ({ coverImage, setCoverImage }: Props) => {
   const inputRef = useRef<HTMLInputElement>(null)
-  const [preview, setPreview] = useState<string | null>(null)
+
+  const previewUrl = coverImage
+    ? coverImage instanceof File
+      ? URL.createObjectURL(coverImage)
+      : `/api/blog/image/${coverImage}`
+    : null
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
       setCoverImage(file)
-      setPreview(URL.createObjectURL(file))
     }
   }
 
@@ -36,8 +41,8 @@ export const CoverUploader = ({ setCoverImage }: Props) => {
           onClick={() => inputRef.current?.click()}
           className="w-full aspect-21/6 bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center text-gray-400 cursor-pointer hover:bg-gray-100 overflow-hidden relative"
         >
-          {preview ? (
-            <Image src={preview} alt="cover" fill className="object-cover" />
+          {previewUrl ? (
+            <Image src={previewUrl} alt="cover" fill className="object-cover" unoptimized />
           ) : (
             <>
               <FiImage size={24} />
