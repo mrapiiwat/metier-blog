@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { IoArrowBackSharp, IoCloseOutline } from 'react-icons/io5'
@@ -23,10 +23,15 @@ const BlogDetailPage = () => {
   const params = useParams()
   const router = useRouter()
   const slug = params.slug as string
+  const hasIncremented = useRef(false)
 
   const [blog, setBlog] = useState<BlogData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
+
+  useEffect(() => {
+    hasIncremented.current = false
+  }, [slug])
 
   useEffect(() => {
     const fetchAndIncrement = async () => {
@@ -34,7 +39,8 @@ const BlogDetailPage = () => {
         const { data } = await axios.get(`/blog/slug/${slug}`)
         setBlog(data)
 
-        if (data.id) {
+        if (data.id && !hasIncremented.current) {
+          hasIncremented.current = true
           await axios.post(`/blog/${data.id}/view`)
         }
       } catch (err) {
@@ -43,6 +49,7 @@ const BlogDetailPage = () => {
         setIsLoading(false)
       }
     }
+
     if (slug) fetchAndIncrement()
   }, [slug])
 
