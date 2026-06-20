@@ -12,6 +12,7 @@ interface Blog {
   content: string
   coverImage: string | null
   author: string
+  viewCount: number
   createdAt: string
 }
 
@@ -116,6 +117,7 @@ const Blogs = () => {
               key={post.id}
               slug={post.slug}
               title={post.title}
+              viewCount={post.viewCount}
               excerpt={
                 post.content.length > 150 ? `${post.content.substring(0, 150)}...` : post.content
               }

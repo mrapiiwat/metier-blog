@@ -46,6 +46,38 @@ export const blogController = new Elysia({ prefix: "/blog", tags: ["BLOG"] })
 			},
 		},
 	)
+	.get(
+		"/slug/:slug",
+		async ({ params, set }) => {
+			const slug = params.slug;
+			const result = await blogService.getBlogBySlug(slug);
+
+			set.status = StatusCodes.OK;
+			return result;
+		},
+		{
+			params: blogSchema.slug,
+			detail: {
+				summary: "ดึงข้อมูลบทความ (ตาม Slug)",
+				description: "ดึงรายละเอียดของบทความ 1 รายการ พร้อมชื่อผู้เขียน",
+			},
+		},
+	)
+
+	.post(
+		"/:id/view",
+		async ({ params }) => {
+			await blogService.incrementViewCount(params.id);
+			return { message: "View count incremented" };
+		},
+		{
+			params: blogSchema.param,
+			detail: {
+				summary: "นับจำนวนผู้เข้าชม",
+				description: "เรียก API นี้เมื่อผู้ใช้เปิดอ่านบทความเพื่อเพิ่มยอดวิว",
+			},
+		},
+	)
 
 	.get(
 		"/image/*",

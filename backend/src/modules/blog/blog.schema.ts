@@ -64,6 +64,10 @@ export const param = t.Object({
 	id: t.String({ format: "uuid", error: "Invalid Blog ID" }),
 });
 
+export const slug = t.Object({
+	slug: t.String(),
+});
+
 export const replaceImage = t.Object({
 	image: t.File({
 		maxSize: 5 * 1024 * 1024,

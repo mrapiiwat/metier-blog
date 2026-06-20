@@ -7,6 +7,7 @@ interface PostCardProps {
   title: string
   excerpt: string
   img: string
+  viewCount?: number
   authorName?: string
   createdAt?: string
 }
@@ -18,6 +19,7 @@ const PostCard: React.FC<PostCardProps> = ({
   img,
   authorName,
   createdAt,
+  viewCount,
 }) => {
   const formattedDate = createdAt
     ? new Date(createdAt).toLocaleDateString('en-US', {
@@ -55,7 +57,9 @@ const PostCard: React.FC<PostCardProps> = ({
           </div>
           <p className="text-xs md:text-sm font-semibold text-gray-500">
             {authorName || 'Anonymous'}{' '}
-            <span className="text-gray-400 font-normal">• {formattedDate} • 3 view</span>
+            <span className="text-gray-400 font-normal">
+              • {formattedDate} • {viewCount} view
+            </span>
           </p>
         </div>
 

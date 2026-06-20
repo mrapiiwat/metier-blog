@@ -3,7 +3,7 @@ import {
 	GetObjectCommand,
 	PutObjectCommand,
 } from "@aws-sdk/client-s3";
-import { and, count, desc, eq, ilike } from "drizzle-orm";
+import { and, count, desc, eq, ilike, sql } from "drizzle-orm";
 import { BUCKET_NAME, s3Client } from "@/common/config/s3";
 import { BadRequestError, NotFoundError } from "@/common/exceptions";
 import { db } from "@/db";
@@ -180,6 +180,38 @@ export class BlogService {
 			author: admin?.name || "Unknown",
 			...restData,
 		};
+	}
+
+	async getBlogBySlug(slug: string) {
+		const rawData = await db.query.blogs.findFirst({
+			where: eq(blogs.slug, slug),
+			with: {
+				admin: {
+					columns: {
+						name: true,
+					},
+				},
+			},
+		});
+
+		if (!rawData) {
+			throw new NotFoundError("Blog not found");
+		}
+
+		const { adminId, admin, ...restData } = rawData;
+		return {
+			author: admin?.name || "Unknown",
+			...restData,
+		};
+	}
+
+	async incrementViewCount(blogId: string) {
+		await db
+			.update(blogs)
+			.set({
+				viewCount: sql`${blogs.viewCount} + 1`,
+			})
+			.where(eq(blogs.id, blogId));
 	}
 
 	async updateBlog(blogId: string, data: blogSchema.update) {
