@@ -1,11 +1,10 @@
-import { FiTrash2, FiCalendar, FiClock, FiHash } from 'react-icons/fi'
+import { FiTrash2, FiCalendar, FiClock } from 'react-icons/fi'
 
 interface SidebarProps<T> {
   formData: T
   setFormData: React.Dispatch<React.SetStateAction<T>>
   onSave: () => void
   isSaving: boolean
-  wordCount?: number
 }
 
 export const Sidebar = <T extends { isPublished: boolean }>({
@@ -13,7 +12,6 @@ export const Sidebar = <T extends { isPublished: boolean }>({
   setFormData,
   onSave,
   isSaving,
-  wordCount,
 }: SidebarProps<T>) => (
   <aside className="flex flex-col gap-4">
     <div className="bg-white border border-gray-100 rounded-2xl p-5 space-y-4">
@@ -44,19 +42,13 @@ export const Sidebar = <T extends { isPublished: boolean }>({
         <span className="text-gray-400 flex items-center gap-2">
           <FiCalendar size={13} /> สร้างเมื่อ
         </span>
-        <span className="font-semibold">1 มิ.ย. 2568</span>
+        <span className="font-semibold">-</span>
       </div>
       <div className="flex justify-between">
         <span className="text-gray-400 flex items-center gap-2">
           <FiClock size={13} /> แก้ไขล่าสุด
         </span>
-        <span className="font-semibold">19 มิ.ย. 2568</span>
-      </div>
-      <div className="flex justify-between">
-        <span className="text-gray-400 flex items-center gap-2">
-          <FiHash size={13} /> จำนวนคำ
-        </span>
-        <span className="font-semibold">{wordCount ?? 0} คำ</span>
+        <span className="font-semibold">-</span>
       </div>
     </div>
 

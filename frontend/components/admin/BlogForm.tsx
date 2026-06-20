@@ -7,8 +7,8 @@ export interface BlogFormData {
   title: string
   slug: string
   isPublished: boolean
-  coverImage: File | null
-  additionalImages: (File | null)[]
+  coverImage: File | string | null
+  additionalImages: (File | string | null)[]
 }
 
 interface BlogFormProps {

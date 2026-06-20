@@ -5,20 +5,12 @@ import Link from 'next/link'
 import { useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { FiArrowLeft, FiPlus } from 'react-icons/fi'
-import { BlogForm } from '@/components/admin/BlogForm'
+import { BlogForm, BlogFormData } from '@/components/admin/BlogForm'
 import { GalleryUploader } from '@/components/admin/GalleryUploader'
 import { Sidebar } from '@/components/admin/Sidebar'
 import { CoverUploader } from '@/components/admin/CoverUploader'
 import { Modal } from '@/components/admin/Modal'
 import axios from '@/lib/axios/admin'
-
-export interface BlogFormData {
-  title: string
-  slug: string
-  isPublished: boolean
-  coverImage: File | null
-  additionalImages: (File | null)[]
-}
 
 const CreateBlogPage = () => {
   const router = useRouter()
@@ -31,7 +23,6 @@ const CreateBlogPage = () => {
   })
 
   const [isSaving, setIsSaving] = useState(false)
-  const [wordCount, setWordCount] = useState(0)
 
   const [modal, setModal] = useState({
     isOpen: false,
@@ -44,10 +35,6 @@ const CreateBlogPage = () => {
     extensions: [StarterKit],
     editorProps: {
       attributes: { class: 'prose prose-sm focus:outline-none max-w-none min-h-[400px] p-5' },
-    },
-    onUpdate: ({ editor }) => {
-      const text = editor.getText()
-      setWordCount(text.split(/\s+/).filter(Boolean).length)
     },
   })
 
@@ -149,7 +136,6 @@ const CreateBlogPage = () => {
           setFormData={setFormData}
           onSave={handleRequestSave}
           isSaving={isSaving}
-          wordCount={wordCount}
         />
       </main>
 
