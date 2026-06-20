@@ -1,36 +1,56 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { IoArrowBackSharp } from 'react-icons/io5'
 import { MdAdminPanelSettings } from 'react-icons/md'
+import useAuthStore from '@/store/authStore'
+import { AxiosError } from 'axios'
 
 const Login = () => {
   const router = useRouter()
-  const [email, setEmail] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+
+  const { actionLogin, user, token } = useAuthStore()
+
+  useEffect(() => {
+    if (token || user) {
+      router.push('/admin')
+    }
+  }, [token, user, router])
+
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
 
-    if (!email.trim() || !password.trim()) {
-      setError('กรุณากรอกอีเมลและรหัสผ่านให้ครบถ้วน')
+    if (!username.trim() || !password.trim()) {
+      setError('กรุณากรอกชื่อผู้ใช้และรหัสผ่านให้ครบถ้วน')
       return
     }
 
     setIsLoading(true)
 
-    setTimeout(() => {
-      if (email === 'admin@admin.com' && password === 'password') {
-        router.push('/dashboard')
+    try {
+      await actionLogin({ username, password })
+
+      router.push('/admin')
+    } catch (err) {
+      if (err instanceof AxiosError) {
+        const errorMessage =
+          err.response?.data?.message ||
+          err.response?.data?.error ||
+          'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง'
+        setError(errorMessage)
       } else {
-        setError('อีเมลหรือรหัสผ่านไม่ถูกต้อง (ทดสอบใช้: admin@admin.com / password)')
-        setIsLoading(false)
+        setError('เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์')
       }
-    }, 800)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -57,15 +77,15 @@ const Login = () => {
 
         <form onSubmit={handleLogin} className="space-y-5">
           <div className="space-y-1.5">
-            <label htmlFor="email" className="text-sm font-bold text-gray-800">
-              อีเมลแอดมิน
+            <label htmlFor="username" className="text-sm font-bold text-gray-800">
+              ชื่อผู้ใช้ (Username)
             </label>
             <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@example.com"
+              type="text"
+              id="username" // 🔥 เปลี่ยนเป็น type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="admin"
               className="w-full text-sm px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-hidden focus:border-gray-900 focus:bg-white transition-all"
               required
             />
@@ -98,11 +118,10 @@ const Login = () => {
             type="submit"
             disabled={isLoading}
             className={`w-full py-3 mt-2 text-white text-sm font-bold rounded-xl transition-all shadow-xs flex justify-center items-center gap-2
-                            ${
-                              isLoading
-                                ? 'bg-gray-400 cursor-not-allowed'
-                                : 'bg-gray-900 hover:bg-gray-800 cursor-pointer active:scale-[0.98]'
-                            }`}
+                            ${isLoading
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-gray-900 hover:bg-gray-800 cursor-pointer active:scale-[0.98]'
+              }`}
           >
             {isLoading ? (
               <>

@@ -14,6 +14,7 @@ export class UserService {
 		const response = {
 			id: userRecord.id,
 			username: userRecord.username,
+			name: userRecord.name
 		};
 
 		return response;

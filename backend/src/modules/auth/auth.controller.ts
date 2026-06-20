@@ -20,7 +20,7 @@ export const authController = new Elysia({ tags: ["AUTH"] })
 			const refreshRaw = await createRefreshToken(response.userId);
 			refreshToken.set({
 				value: refreshRaw,
-				httpOnly: true,
+				httpOnly: false,
 				secure: Bun.env.NODE_ENV === "production",
 				sameSite: "lax",
 				maxAge: Number(Bun.env.REFRESH_EXPIRES_DAYS || 30) * 86400,
@@ -59,7 +59,7 @@ export const authController = new Elysia({ tags: ["AUTH"] })
 
 			refreshToken.set({
 				value: newRefreshToken,
-				httpOnly: true,
+				httpOnly: false,
 				secure: Bun.env.NODE_ENV === "production",
 				sameSite: "lax",
 				maxAge: Number(Bun.env.REFRESH_EXPIRES_DAYS || 30) * 86400,
