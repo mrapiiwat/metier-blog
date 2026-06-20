@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
   FiCheck,
   FiTrash2,
@@ -7,19 +7,28 @@ import {
   FiAlertCircle,
   FiChevronLeft,
   FiChevronRight,
+  FiX,
 } from 'react-icons/fi'
+import axios from '@/lib/axios/admin'
 
 type CommentStatus = 'pending' | 'approved' | 'rejected'
 type AIRecommendation = 'approve' | 'reject' | 'flagged' | 'pending'
 
 interface Comment {
   id: string
-  user: string
-  content: string
+  blogId: string
+  senderName: string
+  message: string
   status: CommentStatus
-  blog: string
-  ai_suggestion: AIRecommendation
-  ai_reason: string
+  aiSuggestion: AIRecommendation
+  aiReason: string
+}
+
+interface FetchParams {
+  page: number
+  limit: number
+  status?: string
+  blogId?: string
 }
 
 const getAIStatusColor = (suggestion: AIRecommendation) => {
@@ -39,60 +48,61 @@ const CommentsPage = () => {
   const [statusFilter, setStatusFilter] = useState<string>('pending')
   const [blogFilter, setBlogFilter] = useState<string>('all')
   const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 2
+  const [totalPages, setTotalPages] = useState(1)
+  const itemsPerPage = 5
 
-  const [comments] = useState<Comment[]>([
-    {
-      id: '1',
-      user: 'Apiwat Lantong',
-      content: 'บทความดีมากครับ!',
-      status: 'pending',
-      blog: 'Classic Revival',
-      ai_suggestion: 'approve',
-      ai_reason: 'เชิงบวกและสุภาพ',
-    },
-    {
-      id: '2',
-      user: 'SpammerX',
-      content: 'ขายของรวยไว...',
-      status: 'pending',
-      blog: 'Tech Trends',
-      ai_suggestion: 'reject',
-      ai_reason: 'ตรวจพบสแปม',
-    },
-    {
-      id: '3',
-      user: 'UserA',
-      content: 'ขอบคุณที่แบ่งปันครับ',
-      status: 'approved',
-      blog: 'Classic Revival',
-      ai_suggestion: 'approve',
-      ai_reason: 'เชิงบวก',
-    },
-    {
-      id: '4',
-      user: 'UserB',
-      content: 'อยากให้ทำรีวิวเพิ่มครับ',
-      status: 'pending',
-      blog: 'Tech Trends',
-      ai_suggestion: 'approve',
-      ai_reason: 'เชิงบวก',
-    },
-  ])
+  const [comments, setComments] = useState<Comment[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
-  const uniqueBlogs = Array.from(new Set(comments.map((c) => c.blog)))
+  const fetchComments = useCallback(async () => {
+    try {
+      setIsLoading(true)
 
-  const filteredComments = comments.filter(
-    (c) =>
-      (statusFilter === 'all' || c.status === statusFilter) &&
-      (blogFilter === 'all' || c.blog === blogFilter)
-  )
+      const params: FetchParams = {
+        page: currentPage,
+        limit: itemsPerPage,
+      }
 
-  const totalPages = Math.ceil(filteredComments.length / itemsPerPage)
-  const paginatedComments = filteredComments.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  )
+      if (statusFilter !== 'all') params.status = statusFilter
+      if (blogFilter !== 'all' && blogFilter.trim() !== '') params.blogId = blogFilter
+
+      const { data } = await axios.get('/comment', { params })
+
+      setComments(data.data)
+      setTotalPages(data.meta.totalPages || 1)
+    } catch (error) {
+      console.error('Failed to fetch comments', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [currentPage, statusFilter, blogFilter])
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchComments()
+  }, [fetchComments])
+
+  const handleUpdateStatus = async (id: string, newStatus: CommentStatus) => {
+    try {
+      await axios.patch(`/comment/${id}/status`, { status: newStatus })
+      fetchComments()
+    } catch (error) {
+      console.error('Failed to update status', error)
+      alert('เกิดข้อผิดพลาดในการเปลี่ยนสถานะ')
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('คุณแน่ใจหรือไม่ว่าต้องการลบคอมเมนต์นี้?')) return
+
+    try {
+      await axios.delete(`/comment/${id}`)
+      fetchComments()
+    } catch (error) {
+      console.error('Failed to delete comment', error)
+      alert('เกิดข้อผิดพลาดในการลบคอมเมนต์')
+    }
+  }
 
   return (
     <div className="min-h-screen bg-[#FDFDFD] p-8 font-sans text-slate-900">
@@ -104,8 +114,8 @@ const CommentsPage = () => {
           </p>
         </div>
 
-        <div className="flex justify-between items-center mb-8">
-          <div className="flex gap-1 bg-slate-100 p-1 rounded-xl">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+          <div className="flex gap-1 bg-slate-100 p-1 rounded-xl overflow-x-auto max-w-full">
             {['all', 'pending', 'approved', 'rejected'].map((tab) => (
               <button
                 key={tab}
@@ -113,64 +123,103 @@ const CommentsPage = () => {
                   setStatusFilter(tab)
                   setCurrentPage(1)
                 }}
-                className={`px-5 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all ${statusFilter === tab ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                className={`px-5 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all whitespace-nowrap ${statusFilter === tab ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
               >
                 {tab}
               </button>
             ))}
           </div>
 
-          <select
-            value={blogFilter}
-            onChange={(e) => {
-              setBlogFilter(e.target.value)
-              setCurrentPage(1)
-            }}
-            className="px-4 py-2 bg-transparent border border-slate-200 rounded-xl text-sm text-slate-600 focus:outline-none"
-          >
-            <option value="all">ทุกบทความ</option>
-            {uniqueBlogs.map((blog) => (
-              <option key={blog} value={blog}>
-                {blog}
-              </option>
-            ))}
-          </select>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              placeholder="กรองด้วย Blog ID..."
+              value={blogFilter === 'all' ? '' : blogFilter}
+              onChange={(e) => {
+                setBlogFilter(e.target.value || 'all')
+                setCurrentPage(1)
+              }}
+              className="px-4 py-2 bg-transparent border border-slate-200 rounded-xl text-sm text-slate-600 focus:outline-none focus:border-slate-400 min-w-50"
+            />
+          </div>
         </div>
 
         <div className="space-y-4">
-          {paginatedComments.length > 0 ? (
-            paginatedComments.map((comment) => (
+          {isLoading ? (
+            <div className="text-center py-20 text-slate-400">กำลังโหลดข้อมูล...</div>
+          ) : comments.length > 0 ? (
+            comments.map((comment) => (
               <div
                 key={comment.id}
                 className="group bg-white p-6 rounded-2xl border border-slate-100 shadow-[0_2px_10px_-3px_rgba(0,0,0,0.05)] hover:border-slate-200 transition-all"
               >
                 <div className="flex justify-between items-start">
                   <div>
-                    <h3 className="font-semibold text-slate-900">{comment.user}</h3>
-                    <p className="text-xs text-slate-400 uppercase tracking-wide font-medium mt-0.5">
-                      {comment.blog}
+                    <h3 className="font-semibold text-slate-900">{comment.senderName}</h3>
+                    <p className="text-xs text-slate-400 font-medium mt-0.5">
+                      Blog ID: <span className="font-mono">{comment.blogId}</span>
                     </p>
                   </div>
                   <div className="flex gap-2">
-                    <button className="text-slate-400 hover:text-emerald-600 p-2">
+                    <button
+                      onClick={() => handleUpdateStatus(comment.id, 'approved')}
+                      disabled={comment.status === 'approved'}
+                      title="Approve"
+                      className={`p-2 rounded-lg transition-colors cursor-pointer ${
+                        comment.status === 'approved'
+                          ? 'text-emerald-500 bg-emerald-50 cursor-not-allowed opacity-50'
+                          : 'text-slate-400 hover:text-emerald-600 bg-slate-50 hover:bg-emerald-50'
+                      }`}
+                    >
                       <FiCheck size={18} />
                     </button>
-                    <button className="text-slate-400 hover:text-rose-600 p-2">
+
+                    <button
+                      onClick={() => handleUpdateStatus(comment.id, 'rejected')}
+                      disabled={comment.status === 'rejected'}
+                      title="Reject"
+                      className={`p-2 rounded-lg transition-colors cursor-pointer ${
+                        comment.status === 'rejected'
+                          ? 'text-rose-500 bg-rose-50 cursor-not-allowed opacity-50'
+                          : 'text-slate-400 hover:text-rose-600 bg-slate-50 hover:bg-rose-50'
+                      }`}
+                    >
+                      <FiX size={18} />
+                    </button>
+
+                    <button
+                      onClick={() => handleDelete(comment.id)}
+                      title="Delete"
+                      className="text-slate-400 hover:text-rose-600 bg-slate-50 hover:bg-rose-50 p-2 rounded-lg transition-colors ml-2 cursor-pointer"
+                    >
                       <FiTrash2 size={18} />
                     </button>
                   </div>
                 </div>
                 <p className="mt-4 text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-xl text-sm">
-                  {`"${comment.content}"`}
+                  {`"${comment.message}"`}
                 </p>
                 <div className="mt-4 flex items-center gap-3">
                   <div
-                    className={`px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-2 ${getAIStatusColor(comment.ai_suggestion)}`}
+                    className={`px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-2 ${getAIStatusColor(comment.aiSuggestion)}`}
                   >
-                    <FiCpu size={12} /> {comment.ai_suggestion.toUpperCase()}
+                    <FiCpu size={12} /> {(comment.aiSuggestion || 'pending').toUpperCase()}
                   </div>
-                  <div className="text-[11px] text-slate-400 flex items-center gap-1.5">
-                    <FiAlertCircle size={12} /> {comment.ai_reason}
+                  {comment.aiReason && (
+                    <div className="text-[11px] text-slate-400 flex items-center gap-1.5">
+                      <FiAlertCircle size={12} /> {comment.aiReason}
+                    </div>
+                  )}
+                  <div
+                    className={`ml-auto text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md ${
+                      comment.status === 'approved'
+                        ? 'bg-emerald-100 text-emerald-700'
+                        : comment.status === 'rejected'
+                          ? 'bg-rose-100 text-rose-700'
+                          : 'bg-slate-100 text-slate-500'
+                    }`}
+                  >
+                    Status: {comment.status}
                   </div>
                 </div>
               </div>
@@ -185,9 +234,9 @@ const CommentsPage = () => {
         {totalPages > 1 && (
           <div className="mt-10 flex justify-center items-center gap-2">
             <button
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage((p) => p - 1)}
-              className="p-2 rounded-lg bg-white border border-slate-200 disabled:opacity-50"
+              disabled={currentPage === 1 || isLoading}
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              className="p-2 rounded-lg bg-white border border-slate-200 disabled:opacity-50 hover:bg-slate-50 cursor-pointer"
             >
               <FiChevronLeft size={20} />
             </button>
@@ -195,9 +244,9 @@ const CommentsPage = () => {
               หน้า {currentPage} จาก {totalPages}
             </span>
             <button
-              disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage((p) => p + 1)}
-              className="p-2 rounded-lg bg-white border border-slate-200 disabled:opacity-50"
+              disabled={currentPage === totalPages || isLoading}
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              className="p-2 rounded-lg bg-white border border-slate-200 disabled:opacity-50 hover:bg-slate-50 cursor-pointer"
             >
               <FiChevronRight size={20} />
             </button>

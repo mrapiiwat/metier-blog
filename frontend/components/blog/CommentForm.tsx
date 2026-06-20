@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import axios from '@/lib/axios/public'
 
 interface CommentFormProps {
   blogId: string | string[] | undefined
@@ -10,13 +11,14 @@ const CommentForm: React.FC<CommentFormProps> = ({ blogId }) => {
   const [commentText, setCommentText] = useState('')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
   const validateComment = (text: string) => {
     const thaiAndNumbersRegex = /^[0-9\u0E00-\u0E7F\s\n]+$/
     return thaiAndNumbersRegex.test(text)
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     setSuccess(false)
@@ -31,10 +33,30 @@ const CommentForm: React.FC<CommentFormProps> = ({ blogId }) => {
       return
     }
 
-    console.log('ส่งข้อมูลคอมเมนต์สำหรับ Blog:', blogId, { author, commentText })
+    try {
+      setIsLoading(true)
 
-    setCommentText('')
-    setSuccess(true)
+      await axios.post('/comment', {
+        blogId: Array.isArray(blogId) ? blogId[0] : blogId,
+        senderName: author,
+        message: commentText,
+      })
+
+      setAuthor('')
+      setCommentText('')
+      setSuccess(true)
+    } catch (err: unknown) {
+      let errorMessage = 'เกิดข้อผิดพลาดในการส่งความคิดเห็น'
+
+      if (err instanceof Error) {
+        const axiosError = err as Error & { response?: { data?: { message?: string } } }
+        errorMessage = axiosError.response?.data?.message || axiosError.message || errorMessage
+      }
+
+      setError(errorMessage)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -59,6 +81,7 @@ const CommentForm: React.FC<CommentFormProps> = ({ blogId }) => {
           placeholder="กรอกชื่อของคุณ"
           className="w-full text-sm px-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-hidden focus:border-gray-900 transition-all"
           required
+          disabled={isLoading}
         />
       </div>
 
@@ -74,6 +97,7 @@ const CommentForm: React.FC<CommentFormProps> = ({ blogId }) => {
           placeholder="พิมพ์ข้อความของคุณที่นี่ (ภาษาไทยและตัวเลขเท่านั้น)..."
           className="w-full text-sm px-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-hidden focus:border-gray-900 transition-all resize-none"
           required
+          disabled={isLoading}
         ></textarea>
       </div>
 
@@ -88,9 +112,10 @@ const CommentForm: React.FC<CommentFormProps> = ({ blogId }) => {
 
       <button
         type="submit"
-        className="px-6 py-2.5 bg-gray-900 text-white text-xs font-bold rounded-xl hover:bg-gray-800 transition-colors cursor-pointer"
+        disabled={isLoading}
+        className="px-6 py-2.5 bg-gray-900 text-white text-xs font-bold rounded-xl hover:bg-gray-800 transition-colors cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed"
       >
-        ส่งความคิดเห็น
+        {isLoading ? 'กำลังส่ง...' : 'ส่งความคิดเห็น'}
       </button>
     </form>
   )

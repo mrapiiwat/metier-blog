@@ -4,7 +4,7 @@ import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { IoArrowBackSharp, IoCloseOutline } from 'react-icons/io5'
 import CommentForm from '@/components/blog/CommentForm'
-import CommentList from '@/components/blog/CommentList'
+import CommentList, { CommentItem } from '@/components/blog/CommentList'
 import axios from '@/lib/axios/public'
 
 interface BlogData {
@@ -16,6 +16,7 @@ interface BlogData {
   author: string
   viewCount: number
   createdAt: string
+  comments: CommentItem[]
 }
 
 const BlogDetailPage = () => {
@@ -45,45 +46,9 @@ const BlogDetailPage = () => {
     if (slug) fetchAndIncrement()
   }, [slug])
 
-  useEffect(() => {
-    const fetchBlog = async () => {
-      try {
-        const { data } = await axios.get(`/blog/slug/${slug}`)
-        setBlog(data)
-      } catch (err) {
-        console.error('Failed to load blog', err)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-    if (slug) fetchBlog()
-  }, [slug])
-
   if (isLoading)
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>
   if (!blog) return <div className="min-h-screen flex items-center justify-center">ไม่พบบทความ</div>
-
-  const approvedComments = [
-    {
-      id: 1,
-      author: 'สมชาย ใจดี',
-      content:
-        'บทความนี้เขียนได้ดีมากครับ ได้ความรู้เรื่องรถคลาสสิกเพิ่มเยอะเลย 10เต็ม10 ไปเลยครับ',
-      date: '2026-06-18T15:00:00.000Z',
-    },
-    {
-      id: 2,
-      author: 'สมหมาย มั่นคง',
-      content: 'อ่านแล้วเข้าใจง่ายมากครับ อยากให้รีวิวรุ่นอื่นเพิ่มด้วยครับ ติดตามเลยครับ',
-      date: '2026-06-18T15:30:00.000Z',
-    },
-    {
-      id: 3,
-      author: 'อำนวย พรชัย',
-      content: 'เนื้อหาแน่นมาก 5555 ชอบการเปรียบเทียบในยุคปัจจุบันกับอดีตครับ',
-      date: '2026-06-18T16:15:00.000Z',
-    },
-  ]
 
   return (
     <>
@@ -152,9 +117,9 @@ const BlogDetailPage = () => {
         <div className="mt-16 pt-12 border-t border-gray-100 max-w-3xl mx-auto space-y-12">
           <div>
             <h3 className="text-xl font-black text-gray-900 mb-6">
-              ความคิดเห็น ({approvedComments.length})
+              ความคิดเห็น ({blog.comments ? blog.comments.length : 0})
             </h3>
-            <CommentList comments={approvedComments} />
+            <CommentList comments={blog.comments || []} />
           </div>
 
           <div className="pt-8 border-t border-gray-100">
