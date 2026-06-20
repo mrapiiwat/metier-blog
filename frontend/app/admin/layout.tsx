@@ -14,7 +14,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       router.push('/login')
     }
   }, [token, user, router])
-  
+
   if (typeof window === 'undefined' || !token || !user) {
     return null
   }
