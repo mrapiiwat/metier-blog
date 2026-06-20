@@ -389,4 +389,22 @@ export class BlogService {
 
 		return popularBlogs;
 	}
+
+	async getLatestBlog() {
+		const [latestBlog] = await db
+			.select({
+				id: blogs.id,
+				title: blogs.title,
+				slug: blogs.slug,
+				coverImage: blogs.coverImage,
+				createdAt: blogs.createdAt,
+				authorName: admins.name,
+			})
+			.from(blogs)
+			.leftJoin(admins, eq(blogs.adminId, admins.id))
+			.orderBy(desc(blogs.createdAt))
+			.limit(1);
+
+		return latestBlog || null;
+	}
 }

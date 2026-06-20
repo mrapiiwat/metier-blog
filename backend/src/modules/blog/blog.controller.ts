@@ -53,6 +53,13 @@ export const blogController = new Elysia({ prefix: "/blog", tags: ["BLOG"] })
 		},
 	)
 
+	.get("/latest", async ({ set }) => {
+		const response = await blogService.getLatestBlog();
+
+		set.status = StatusCodes.OK;
+		return response;
+	})
+
 	.get(
 		"/slug/:slug",
 		async ({ params, set }) => {
