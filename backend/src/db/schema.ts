@@ -18,6 +18,13 @@ export const commentStatus = pgEnum("comment_status", [
 	"rejected",
 ]);
 
+export const aiRecommendation = pgEnum("ai_recommendation", [
+	"approve",
+	"reject",
+	"flagged",
+	"pending",
+]);
+
 export const admins = pgTable(
 	"admins",
 	{
@@ -125,6 +132,8 @@ export const comments = pgTable(
 		senderName: varchar("sender_name", { length: 100 }).notNull(),
 		message: text().notNull(),
 		status: commentStatus().default("pending"),
+		aiSuggestion: aiRecommendation("ai_suggestion").default("pending"),
+		aiReason: text("ai_reason"),
 		createdAt: timestamp("created_at", {
 			withTimezone: true,
 			mode: "string",

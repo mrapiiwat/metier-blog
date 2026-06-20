@@ -191,6 +191,17 @@ export class BlogService {
 						name: true,
 					},
 				},
+				comments: {
+					where: (commentsTable, { eq }) =>
+						eq(commentsTable.status, "approved"),
+					orderBy: (commentsTable, { desc }) => [desc(commentsTable.createdAt)],
+					columns: {
+						id: true,
+						senderName: true,
+						message: true,
+						createdAt: true,
+					},
+				},
 			},
 		});
 
@@ -198,10 +209,12 @@ export class BlogService {
 			throw new NotFoundError("Blog not found");
 		}
 
-		const { adminId, admin, ...restData } = rawData;
+		const { adminId, admin, comments: blogComments, ...restData } = rawData;
+
 		return {
-			author: admin?.name || "Unknown",
 			...restData,
+			author: admin?.name || "Unknown",
+			comments: blogComments || [],
 		};
 	}
 
