@@ -7,7 +7,7 @@ import { and, count, desc, eq, ilike, sql } from "drizzle-orm";
 import { BUCKET_NAME, s3Client } from "@/common/config/s3";
 import { BadRequestError, NotFoundError } from "@/common/exceptions";
 import { db } from "@/db";
-import { blogs } from "@/db/schema";
+import { admins, blogs } from "@/db/schema";
 import type * as blogSchema from "./blog.schema";
 
 export class BlogService {
@@ -369,5 +369,24 @@ export class BlogService {
 		await db.delete(blogs).where(eq(blogs.id, blogId));
 
 		return { message: "Blog and associated images deleted successfully" };
+	}
+
+	async getPopularBlogs(top: number) {
+		const popularBlogs = await db
+			.select({
+				id: blogs.id,
+				title: blogs.title,
+				slug: blogs.slug,
+				coverImage: blogs.coverImage,
+				authorName: admins.name,
+				createdAt: blogs.createdAt,
+				views: blogs.viewCount,
+			})
+			.from(blogs)
+			.leftJoin(admins, eq(blogs.adminId, admins.id))
+			.orderBy(desc(blogs.viewCount))
+			.limit(top);
+
+		return popularBlogs;
 	}
 }

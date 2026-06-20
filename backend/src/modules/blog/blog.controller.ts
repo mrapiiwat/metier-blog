@@ -29,23 +29,38 @@ export const blogController = new Elysia({ prefix: "/blog", tags: ["BLOG"] })
 		"/:id",
 		async ({ params, set }) => {
 			const blogId = params.id;
-			const result = await blogService.getBlogById(blogId);
+			const response = await blogService.getBlogById(blogId);
 
 			set.status = StatusCodes.OK;
-			return result;
+			return response;
 		},
 		{
 			params: blogSchema.param,
 		},
 	)
+
+	.get(
+		"/popular/:top",
+		async ({ params, set }) => {
+			const top = Number(params.top);
+			const response = await blogService.getPopularBlogs(top);
+
+			set.status = StatusCodes.OK;
+			return response;
+		},
+		{
+			params: blogSchema.top,
+		},
+	)
+
 	.get(
 		"/slug/:slug",
 		async ({ params, set }) => {
 			const slug = params.slug;
-			const result = await blogService.getBlogBySlug(slug);
+			const response = await blogService.getBlogBySlug(slug);
 
 			set.status = StatusCodes.OK;
-			return result;
+			return response;
 		},
 		{
 			params: blogSchema.slug,

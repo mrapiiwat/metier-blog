@@ -79,3 +79,7 @@ export const params = t.Object({
 	id: t.String({ format: "uuid", error: "Invalid Blog ID" }),
 	slot: t.Numeric({ error: "Slot must be a number" }),
 });
+
+export const top = t.Object({
+	top: t.Optional(t.Numeric({ default: 5 })),
+});
