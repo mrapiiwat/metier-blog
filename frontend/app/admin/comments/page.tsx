@@ -53,21 +53,20 @@ const CommentsPage = () => {
 
   const [comments, setComments] = useState<Comment[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [commentToDelete, setCommentToDelete] = useState<Comment | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const fetchComments = useCallback(async () => {
     try {
       setIsLoading(true)
-
       const params: FetchParams = {
         page: currentPage,
         limit: itemsPerPage,
       }
-
       if (statusFilter !== 'all') params.status = statusFilter
       if (blogFilter !== 'all' && blogFilter.trim() !== '') params.blogId = blogFilter
 
       const { data } = await axios.get('/comment', { params })
-
       setComments(data.data)
       setTotalPages(data.meta.totalPages || 1)
     } catch (error) {
@@ -92,15 +91,18 @@ const CommentsPage = () => {
     }
   }
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm('คุณแน่ใจหรือไม่ว่าต้องการลบคอมเมนต์นี้?')) return
-
+  const handleDelete = async () => {
+    if (!commentToDelete) return
+    setIsDeleting(true)
     try {
-      await axios.delete(`/comment/${id}`)
+      await axios.delete(`/comment/${commentToDelete.id}`)
       fetchComments()
+      setCommentToDelete(null)
     } catch (error) {
       console.error('Failed to delete comment', error)
       alert('เกิดข้อผิดพลาดในการลบคอมเมนต์')
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -188,7 +190,7 @@ const CommentsPage = () => {
                     </button>
 
                     <button
-                      onClick={() => handleDelete(comment.id)}
+                      onClick={() => setCommentToDelete(comment)}
                       title="Delete"
                       className="text-slate-400 hover:text-rose-600 bg-slate-50 hover:bg-rose-50 p-2 rounded-lg transition-colors ml-2 cursor-pointer"
                     >
@@ -253,6 +255,47 @@ const CommentsPage = () => {
           </div>
         )}
       </div>
+
+      {commentToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-rose-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <FiTrash2 className="text-rose-500 w-8 h-8" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">ลบความคิดเห็น</h3>
+              <p className="text-sm text-gray-500 mb-6">
+                คุณแน่ใจหรือไม่ว่าต้องการลบความคิดเห็นของ <b>{commentToDelete.senderName}</b>?
+                การกระทำนี้ไม่สามารถย้อนกลับได้
+              </p>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setCommentToDelete(null)}
+                  disabled={isDeleting}
+                  className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors"
+                >
+                  ยกเลิก
+                </button>
+                <button
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                  className="flex-1 px-4 py-2.5 bg-rose-500 text-white font-bold rounded-xl hover:bg-rose-600 transition-colors flex justify-center items-center gap-2 disabled:bg-rose-400"
+                >
+                  {isDeleting ? (
+                    <>
+                      <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                      กำลังลบ...
+                    </>
+                  ) : (
+                    'ยืนยันการลบ'
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
