@@ -22,10 +22,6 @@ export const blogController = new Elysia({ prefix: "/blog", tags: ["BLOG"] })
 		},
 		{
 			query: blogSchema.query,
-			detail: {
-				summary: "ดึงรายการบทความ",
-				description: "ดึงรายการบทความทั้งหมดแบบแบ่งหน้า (หน้าละ 10 รายการ)",
-			},
 		},
 	)
 
@@ -40,10 +36,6 @@ export const blogController = new Elysia({ prefix: "/blog", tags: ["BLOG"] })
 		},
 		{
 			params: blogSchema.param,
-			detail: {
-				summary: "ดึงข้อมูลบทความ (ตาม ID)",
-				description: "ดึงรายละเอียดของบทความ 1 รายการ พร้อมชื่อผู้เขียน",
-			},
 		},
 	)
 	.get(
@@ -57,10 +49,6 @@ export const blogController = new Elysia({ prefix: "/blog", tags: ["BLOG"] })
 		},
 		{
 			params: blogSchema.slug,
-			detail: {
-				summary: "ดึงข้อมูลบทความ (ตาม Slug)",
-				description: "ดึงรายละเอียดของบทความ 1 รายการ พร้อมชื่อผู้เขียน",
-			},
 		},
 	)
 
@@ -72,39 +60,25 @@ export const blogController = new Elysia({ prefix: "/blog", tags: ["BLOG"] })
 		},
 		{
 			params: blogSchema.param,
-			detail: {
-				summary: "นับจำนวนผู้เข้าชม",
-				description: "เรียก API นี้เมื่อผู้ใช้เปิดอ่านบทความเพื่อเพิ่มยอดวิว",
-			},
 		},
 	)
 
-	.get(
-		"/image/*",
-		async ({ params, set }) => {
-			const objectKey = params["*"];
+	.get("/image/*", async ({ params, set }) => {
+		const objectKey = params["*"];
 
-			try {
-				const response = await blogService.getImage(objectKey);
+		try {
+			const response = await blogService.getImage(objectKey);
 
-				set.headers["Content-Type"] = response.ContentType || "image/jpeg";
-				set.headers["Cache-Control"] = "public, max-age=31536000";
-				set.status = StatusCodes.OK;
+			set.headers["Content-Type"] = response.ContentType || "image/jpeg";
+			set.headers["Cache-Control"] = "public, max-age=31536000";
+			set.status = StatusCodes.OK;
 
-				return response.Body;
-			} catch (_error) {
-				set.status = StatusCodes.NOT_FOUND;
-				return { message: "Image not found" };
-			}
-		},
-		{
-			detail: {
-				summary: "ดึงรูปภาพบทความ",
-				description:
-					"ดึงรูปภาพหน้าปก (Cover) และรูปภาพประกอบอื่นๆ ของบทความจาก MinIO (เส้นนี้เป็นแบบสาธารณะ ไม่ต้องใช้ Token)",
-			},
-		},
-	)
+			return response.Body;
+		} catch (_error) {
+			set.status = StatusCodes.NOT_FOUND;
+			return { message: "Image not found" };
+		}
+	})
 
 	.use(authenticateJWT)
 	.guard(
@@ -127,11 +101,6 @@ export const blogController = new Elysia({ prefix: "/blog", tags: ["BLOG"] })
 					},
 					{
 						body: blogSchema.create,
-						detail: {
-							summary: "สร้างบทความใหม่",
-							description:
-								"สร้างบทความใหม่ลงในระบบ พร้อมอัปโหลดรูปภาพหน้าปก (Cover) และรูปภาพประกอบ (สูงสุด 6 รูป)",
-						},
 					},
 				)
 
@@ -148,10 +117,6 @@ export const blogController = new Elysia({ prefix: "/blog", tags: ["BLOG"] })
 					{
 						params: blogSchema.param,
 						body: blogSchema.update,
-						detail: {
-							summary: "แก้ไขบทความ",
-							description: "แก้ไขข้อมูลบทความ เฉพาะฟิลด์ที่ส่งมา",
-						},
 					},
 				)
 
@@ -174,10 +139,6 @@ export const blogController = new Elysia({ prefix: "/blog", tags: ["BLOG"] })
 					{
 						params: blogSchema.params,
 						body: blogSchema.replaceImage,
-						detail: {
-							summary: "เปลี่ยนรูปประกอบ (ตามช่อง)",
-							description: "แทนที่รูปภาพประกอบบทความในช่องที่กำหนด (1-6)",
-						},
 					},
 				)
 				.delete(
@@ -191,11 +152,6 @@ export const blogController = new Elysia({ prefix: "/blog", tags: ["BLOG"] })
 					},
 					{
 						params: blogSchema.param,
-						detail: {
-							summary: "ลบบทความ",
-							description:
-								"ลบบทความและเคลียร์รูปภาพทั้งหมดออกจาก MinIO แบบถอนรากถอนโคน",
-						},
 					},
 				),
 	);

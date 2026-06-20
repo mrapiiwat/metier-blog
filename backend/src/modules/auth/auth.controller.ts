@@ -34,49 +34,35 @@ export const authController = new Elysia({ tags: ["AUTH"] })
 		},
 		{
 			body: authSchema.loginSchema,
-			detail: {
-				summary: "เข้าสู่ระบบ",
-				description:
-					"เข้าสู่ระบบด้วยอีเมลและรหัสผ่านเพื่อรับ Access Token และ Refresh Token",
-			},
 		},
 	)
 
-	.get(
-		"/refreshToken",
-		async ({ cookie: { refreshToken }, set, jwt }) => {
-			const raw = refreshToken.value;
-			if (!raw) {
-				set.status = StatusCodes.UNAUTHORIZED;
-				return { error: "No refresh token" };
-			}
+	.get("/refreshToken", async ({ cookie: { refreshToken }, set, jwt }) => {
+		const raw = refreshToken.value;
+		if (!raw) {
+			set.status = StatusCodes.UNAUTHORIZED;
+			return { error: "No refresh token" };
+		}
 
-			const { adminId, newRefreshToken } = await authService.refreshToken(
-				raw as string,
-			);
+		const { adminId, newRefreshToken } = await authService.refreshToken(
+			raw as string,
+		);
 
-			const accessToken = await jwt.sign({ id: adminId });
+		const accessToken = await jwt.sign({ id: adminId });
 
-			refreshToken.set({
-				value: newRefreshToken,
-				httpOnly: false,
-				secure: Bun.env.NODE_ENV === "production",
-				sameSite: "lax",
-				maxAge: Number(Bun.env.REFRESH_EXPIRES_DAYS || 30) * 86400,
-				path: "/",
-			});
+		refreshToken.set({
+			value: newRefreshToken,
+			httpOnly: false,
+			secure: Bun.env.NODE_ENV === "production",
+			sameSite: "lax",
+			maxAge: Number(Bun.env.REFRESH_EXPIRES_DAYS || 30) * 86400,
+			path: "/",
+		});
 
-			set.status = StatusCodes.OK;
+		set.status = StatusCodes.OK;
 
-			return { accessToken };
-		},
-		{
-			detail: {
-				summary: "ต่ออายุ Access Token",
-				description: "ใช้ Refresh Token เพื่อขอ Access Token ใหม่",
-			},
-		},
-	)
+		return { accessToken };
+	})
 
 	.use(authenticateJWT)
 	.guard(
@@ -106,10 +92,6 @@ export const authController = new Elysia({ tags: ["AUTH"] })
 				},
 				{
 					cookie: authSchema.cookie,
-					detail: {
-						summary: "ออกจากระบบ",
-						description: "ยกเลิก Refresh Token และลบ Cookie ออกจากระบบ",
-					},
 				},
 			),
 	);
