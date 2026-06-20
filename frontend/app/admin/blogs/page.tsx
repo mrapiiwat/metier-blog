@@ -1,78 +1,99 @@
 'use client'
-import React, { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { FiPlus } from 'react-icons/fi'
 import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import BlogSearch, { FilterStatus } from '@/components/admin/BlogSearch'
 import BlogTable, { BlogItem } from '@/components/admin/BlogTable'
+import axios from '@/lib/axios/admin'
+import { Modal } from '@/components/admin/Modal'
+
+interface ApiBlogItem {
+  id: number
+  title: string
+  slug: string
+  createdAt: string
+  views: number
+  isPublished: boolean
+}
+
+interface ApiResponse {
+  data: ApiBlogItem[]
+  meta: {
+    totalPages: number
+  }
+}
 
 const ManageBlogs = () => {
-  const [blogs, setBlogs] = useState<BlogItem[]>([
-    {
-      id: 1,
-      title: 'Classic Revival: Revisiting Iconic Cars',
-      slug: 'classic-revival',
-      date: '2026-06-18',
-      views: 1250,
-      isPublished: true,
-    },
-    {
-      id: 2,
-      title: 'The Future of Electric Vehicles Strategy',
-      slug: 'future-ev',
-      date: '2026-06-15',
-      views: 840,
-      isPublished: false,
-    },
-    {
-      id: 3,
-      title: 'Top 10 Maintenance Tips for Old Cars',
-      slug: 'maintenance-tips',
-      date: '2026-06-10',
-      views: 3200,
-      isPublished: true,
-    },
-    {
-      id: 4,
-      title: 'Why 90s JDM Cars Are Increasing In Value',
-      slug: '90s-jdm',
-      date: '2026-06-08',
-      views: 4500,
-      isPublished: true,
-    },
-    {
-      id: 5,
-      title: 'How to Choose the Right Tires for Your Car',
-      slug: 'choose-right-tires',
-      date: '2026-06-05',
-      views: 0,
-      isPublished: false,
-    },
-  ])
-
+  const [blogs, setBlogs] = useState<BlogItem[]>([])
+  const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
 
-  const handleTogglePublish = (id: number) => {
-    setBlogs(blogs.map((b) => (b.id === id ? { ...b, isPublished: !b.isPublished } : b)))
-  }
+  const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; id: number | null }>({
+    isOpen: false,
+    id: null,
+  })
 
-  const handleDelete = (id: number) => {
-    if (confirm('คุณแน่ใจหรือไม่ว่าต้องการลบบทความนี้?')) {
-      setBlogs(blogs.filter((b) => b.id !== id))
+  const fetchBlogs = useCallback(
+    async (page: number) => {
+      setIsLoading(true)
+      try {
+        const res = await axios.get<ApiResponse>('/blog', {
+          params: { search: searchQuery, page },
+        })
+
+        const mappedBlogs: BlogItem[] = res.data.data.map((b: ApiBlogItem) => ({
+          id: b.id,
+          title: b.title,
+          slug: b.slug,
+          date: new Date(b.createdAt).toLocaleDateString(),
+          views: b.views || 0,
+          isPublished: b.isPublished,
+        }))
+
+        setBlogs(mappedBlogs)
+        setTotalPages(res.data.meta.totalPages)
+        setCurrentPage(page)
+      } catch (error) {
+        console.error('Failed to fetch blogs:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    },
+    [searchQuery]
+  )
+
+  useEffect(() => {
+    const loadInitialData = async () => {
+      await fetchBlogs(1)
+    }
+    loadInitialData()
+  }, [fetchBlogs])
+
+  const handleTogglePublish = async (id: number) => {
+    const blog = blogs.find((b) => b.id === id)
+    if (!blog) return
+    try {
+      await axios.put(`/blog/${id}`, { isPublished: !blog.isPublished })
+      await fetchBlogs(currentPage)
+    } catch (error) {
+      console.error('Toggle publish failed', error)
     }
   }
 
-  const filteredBlogs = blogs.filter((blog) => {
-    const matchSearch =
-      blog.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      blog.slug.toLowerCase().includes(searchQuery.toLowerCase())
-
-    let matchFilter = true
-    if (filterStatus === 'published') matchFilter = blog.isPublished === true
-    if (filterStatus === 'draft') matchFilter = blog.isPublished === false
-
-    return matchSearch && matchFilter
-  })
+  const confirmDelete = async () => {
+    if (deleteModal.id) {
+      try {
+        await axios.delete(`/blog/${deleteModal.id}`)
+        setDeleteModal({ isOpen: false, id: null })
+        await fetchBlogs(currentPage)
+      } catch (error) {
+        console.error('Delete failed', error)
+      }
+    }
+  }
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] font-sans pb-20">
@@ -88,17 +109,39 @@ const ManageBlogs = () => {
         <BlogSearch
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
-          totalItems={filteredBlogs.length}
+          totalItems={blogs.length}
           filterStatus={filterStatus}
           setFilterStatus={setFilterStatus}
         />
 
-        <BlogTable
-          blogs={filteredBlogs}
-          onTogglePublish={handleTogglePublish}
-          onDelete={handleDelete}
-        />
+        {isLoading ? (
+          <div className="p-20 text-center text-slate-400">กำลังโหลดข้อมูล...</div>
+        ) : (
+          <BlogTable
+            blogs={blogs.filter((b) =>
+              filterStatus === 'all'
+                ? true
+                : filterStatus === 'published'
+                  ? b.isPublished
+                  : !b.isPublished
+            )}
+            onTogglePublish={handleTogglePublish}
+            onDelete={(id) => setDeleteModal({ isOpen: true, id })}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={fetchBlogs}
+          />
+        )}
       </div>
+
+      <Modal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false, id: null })}
+        title="ยืนยันการลบบทความ"
+        message="คุณแน่ใจหรือไม่ว่าต้องการลบบทความนี้? การดำเนินการนี้ไม่สามารถย้อนกลับได้"
+        type="confirm"
+        onConfirm={confirmDelete}
+      />
     </div>
   )
 }

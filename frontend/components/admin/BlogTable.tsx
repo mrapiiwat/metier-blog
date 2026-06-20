@@ -2,7 +2,7 @@
 import React from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { FiEye } from 'react-icons/fi'
+import { FiEye, FiTrash2 } from 'react-icons/fi'
 
 export interface BlogItem {
   id: number
@@ -16,9 +16,20 @@ export interface BlogItem {
 interface BlogTableProps {
   blogs: BlogItem[]
   onTogglePublish: (id: number) => void
+  onDelete: (id: number) => void
+  currentPage: number
+  totalPages: number
+  onPageChange: (page: number) => void
 }
 
-const BlogTable: React.FC<BlogTableProps> = ({ blogs, onTogglePublish }) => {
+const BlogTable: React.FC<BlogTableProps> = ({
+  blogs,
+  onTogglePublish,
+  onDelete,
+  currentPage,
+  totalPages,
+  onPageChange,
+}) => {
   const router = useRouter()
 
   return (
@@ -30,7 +41,7 @@ const BlogTable: React.FC<BlogTableProps> = ({ blogs, onTogglePublish }) => {
               <th className="px-6 py-5">Article Information</th>
               <th className="px-6 py-5">Status</th>
               <th className="px-6 py-5">Engagement</th>
-              <th className="px-6 py-5 text-right">Preview</th>
+              <th className="px-6 py-5 text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50">
@@ -42,12 +53,11 @@ const BlogTable: React.FC<BlogTableProps> = ({ blogs, onTogglePublish }) => {
               </tr>
             ) : (
               blogs.map((blog) => (
-                <tr
-                  key={blog.id}
-                  onClick={() => router.push(`blogs/edit/${blog.id}`)}
-                  className="group cursor-pointer hover:bg-slate-50/80 transition-all duration-300"
-                >
-                  <td className="px-6 py-6">
+                <tr key={blog.id} className="group transition-all duration-300">
+                  <td
+                    className="px-6 py-6 cursor-pointer"
+                    onClick={() => router.push(`blogs/edit/${blog.id}`)}
+                  >
                     <div className="flex flex-col">
                       <span className="font-semibold text-slate-800 text-sm group-hover:text-indigo-600 transition-colors">
                         {blog.title}
@@ -59,14 +69,11 @@ const BlogTable: React.FC<BlogTableProps> = ({ blogs, onTogglePublish }) => {
                   </td>
                   <td className="px-6 py-6">
                     <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        onTogglePublish(blog.id)
-                      }}
-                      className={`px-3 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase transition-all duration-300 ${
+                      onClick={() => onTogglePublish(blog.id)}
+                      className={`px-3 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase transition-all ${
                         blog.isPublished
                           ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
-                          : 'bg-slate-100 text-slate-500 border-transparent'
+                          : 'bg-slate-100 text-slate-500'
                       }`}
                     >
                       {blog.isPublished ? 'Published' : 'Draft'}
@@ -75,20 +82,25 @@ const BlogTable: React.FC<BlogTableProps> = ({ blogs, onTogglePublish }) => {
                   <td className="px-6 py-6">
                     <div className="flex items-baseline gap-1.5">
                       <span className="font-bold text-slate-700 text-sm">
-                        {blog.views.toLocaleString()}
+                        {(blog.views ?? 0).toLocaleString()}
                       </span>
                       <span className="text-[10px] text-slate-400 font-medium">Views</span>
                     </div>
                   </td>
-                  <td className="px-6 py-6 text-right">
+                  <td className="px-6 py-6 text-right flex items-center justify-end gap-2">
                     <Link
                       href={`/blogs/${blog.slug}`}
                       target="_blank"
-                      onClick={(e) => e.stopPropagation()}
-                      className="inline-block p-2 text-slate-400 hover:text-indigo-600 transition-colors"
+                      className="p-2 text-slate-400 hover:text-indigo-600"
                     >
                       <FiEye size={18} />
                     </Link>
+                    <button
+                      onClick={() => onDelete(blog.id)}
+                      className="p-2 text-slate-400 hover:text-red-600"
+                    >
+                      <FiTrash2 size={18} />
+                    </button>
                   </td>
                 </tr>
               ))
@@ -99,13 +111,18 @@ const BlogTable: React.FC<BlogTableProps> = ({ blogs, onTogglePublish }) => {
 
       <div className="px-6 py-4 border-t border-slate-50 flex items-center justify-between">
         <div className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">
-          Showing {blogs.length} Results
+          Page {currentPage} of {totalPages}
         </div>
         <div className="flex gap-1">
-          {['1', '2', '3'].map((page) => (
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
             <button
               key={page}
-              className={`w-8 h-8 rounded-lg text-[11px] font-bold transition-all ${page === '1' ? 'bg-slate-900 text-white shadow-lg' : 'bg-slate-50 text-slate-400 hover:bg-slate-100'}`}
+              onClick={() => onPageChange(page)}
+              className={`w-8 h-8 rounded-lg text-[11px] font-bold transition-all ${
+                page === currentPage
+                  ? 'bg-slate-900 text-white shadow-lg'
+                  : 'bg-slate-50 text-slate-400 hover:bg-slate-100'
+              }`}
             >
               {page}
             </button>
