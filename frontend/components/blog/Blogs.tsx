@@ -53,6 +53,7 @@ const Blogs = () => {
           params: {
             page: currentPage,
             search: debouncedSearch || undefined,
+            isPublic: true,
           },
         })
 

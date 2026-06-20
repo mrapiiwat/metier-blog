@@ -34,6 +34,7 @@ export type create = Static<typeof create>;
 export const query = t.Object({
 	page: t.Optional(t.Numeric({ default: 1 })),
 	search: t.Optional(t.String()),
+	isPublic: t.Optional(t.BooleanString()),
 });
 
 export const update = t.Partial(

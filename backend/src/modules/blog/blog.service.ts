@@ -3,7 +3,7 @@ import {
 	GetObjectCommand,
 	PutObjectCommand,
 } from "@aws-sdk/client-s3";
-import { count, desc, eq, ilike } from "drizzle-orm";
+import { and, count, desc, eq, ilike } from "drizzle-orm";
 import { BUCKET_NAME, s3Client } from "@/common/config/s3";
 import { BadRequestError, NotFoundError } from "@/common/exceptions";
 import { db } from "@/db";
@@ -108,42 +108,43 @@ export class BlogService {
 		return response;
 	}
 
-	async getBlogs(page: number, search?: string) {
+	async getBlogs(page: number, search?: string, isPublic?: boolean) {
 		const limit = 10;
 		const offset = (page - 1) * limit;
 
-		const whereCondition = search
-			? ilike(blogs.title, `%${search}%`)
-			: undefined;
+		const conditions = [];
+
+		if (search) {
+			conditions.push(ilike(blogs.title, `%${search}%`));
+		}
+
+		if (isPublic !== undefined) {
+			conditions.push(eq(blogs.isPublished, isPublic));
+		}
+
+		const whereCondition =
+			conditions.length > 0 ? and(...conditions) : undefined;
 
 		const rawData = await db.query.blogs.findMany({
 			limit: limit,
 			offset: offset,
 			orderBy: [desc(blogs.createdAt)],
 			where: whereCondition,
-			columns: {
-				additionalImages: false,
-			},
+			columns: { additionalImages: false },
 			with: {
-				admin: {
-					columns: {
-						name: true,
-					},
-				},
+				admin: { columns: { name: true } },
 			},
 		});
 
 		const data = rawData.map((blog) => {
 			const { adminId, admin, ...restData } = blog;
-			return {
-				author: admin.name,
-				...restData,
-			};
+			return { author: admin?.name || "Unknown", ...restData };
 		});
 
-		const totalResult = search
-			? await db.select({ value: count() }).from(blogs).where(whereCondition)
-			: await db.select({ value: count() }).from(blogs);
+		const totalResult = await db
+			.select({ value: count() })
+			.from(blogs)
+			.where(whereCondition);
 
 		const total = totalResult[0].value;
 
