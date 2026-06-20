@@ -7,9 +7,10 @@ interface BlogCardProps {
   title: string
   img: string
   views: number
+  author: string
 }
 
-const BlogCard: React.FC<BlogCardProps> = ({ slug, title, img, views }) => (
+const BlogCard: React.FC<BlogCardProps> = ({ author, slug, title, img, views }) => (
   <Link
     href={`/blogs/${slug}`}
     className="bg-[#F4F0F8] p-5 rounded-2xl transition-all duration-300 hover:shadow-lg"
@@ -32,7 +33,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ slug, title, img, views }) => (
       </div>
 
       <div className="text-sm">
-        <p className="font-bold text-gray-900">Dasteen</p>
+        <p className="font-bold text-gray-900">{author}</p>
         <p className="text-gray-500 text-xs">Jan 10, 2024 • {views} Read</p>
       </div>
     </div>

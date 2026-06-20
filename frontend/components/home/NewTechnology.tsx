@@ -52,6 +52,7 @@ const NewTechnology = () => {
           {blogs.map((blog) => (
             <BlogCard
               key={blog.id}
+              author={blog.authorName}
               views={blog.views}
               slug={blog.slug}
               title={blog.title}
