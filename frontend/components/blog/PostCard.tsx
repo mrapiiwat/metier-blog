@@ -19,8 +19,6 @@ const PostCard: React.FC<PostCardProps> = ({
   authorName,
   createdAt,
 }) => {
-  console.log(img)
-
   const formattedDate = createdAt
     ? new Date(createdAt).toLocaleDateString('en-US', {
         month: 'short',
@@ -31,7 +29,7 @@ const PostCard: React.FC<PostCardProps> = ({
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-[40%_1fr] gap-6 items-start">
-      <div className="relative w-120 h-75 shrink-0">
+      <div className="relative w-full aspect-video md:aspect-auto md:h-75 shrink-0">
         <Link href={`/blogs/${slug}`}>
           <Image
             src={img}
@@ -57,11 +55,14 @@ const PostCard: React.FC<PostCardProps> = ({
           </div>
           <p className="text-xs md:text-sm font-semibold text-gray-500">
             {authorName || 'Anonymous'}{' '}
-            <span className="text-gray-400 font-normal">• {formattedDate} • 3 Read</span>
+            <span className="text-gray-400 font-normal">• {formattedDate} • 3 view</span>
           </p>
         </div>
 
-        <p className="font-light mb-4 leading-relaxed line-clamp-3 text-gray-600">{excerpt}</p>
+        <div
+          className="prose prose-sm md:prose-base prose-p:my-0 prose-li:my-0 mb-4 text-gray-600 line-clamp-3"
+          dangerouslySetInnerHTML={{ __html: excerpt }}
+        />
 
         <Link
           href={`/blogs/${slug}`}
