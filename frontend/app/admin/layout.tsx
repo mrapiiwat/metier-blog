@@ -1,6 +1,6 @@
 'use client'
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react' // ไม่ต้องใช้ useState
+import { useEffect, useState } from 'react'
 import useAuthStore from '@/store/authStore'
 import Header from '@/components/layouts/admin/Header'
 import Footer from '@/components/layouts/admin/Footer'
@@ -8,15 +8,27 @@ import Footer from '@/components/layouts/admin/Footer'
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const { token, user } = useAuthStore()
+  const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
-    if (!token || !user) {
-      router.push('/login')
-    }
-  }, [token, user, router])
+    setIsMounted(true)
+  }, [])
 
-  if (typeof window === 'undefined' || !token || !user) {
-    return null
+  useEffect(() => {
+    if (isMounted) {
+      if (!token || !user) {
+        router.push('/login')
+      }
+    }
+  }, [isMounted, token, user, router])
+
+  if (!isMounted || !token || !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 text-gray-500">
+        <span className="w-6 h-6 border-2 border-gray-300 border-t-gray-800 rounded-full animate-spin mr-2"></span>
+        กำลังโหลดข้อมูล...
+      </div>
+    )
   }
 
   return (

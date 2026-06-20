@@ -1,76 +1,47 @@
-import axios, { AxiosError } from 'axios'
-import type { InternalAxiosRequestConfig, AxiosRequestHeaders, AxiosResponse } from 'axios'
+import axios from 'axios'
 import useAuthStore from '@/store/authStore'
 
-interface FailedQueueItem {
-  resolve: (value: string | PromiseLike<string>) => void
-  reject: (error: unknown) => void
-}
+const baseURL = '/api'
 
-const instance = axios.create({
-  baseURL: '/api',
+const api = axios.create({
+  baseURL,
   withCredentials: true,
 })
 
-let isRefreshing = false
-let failedQueue: FailedQueueItem[] = []
-
-const processQueue = (error: unknown, token?: string) => {
-  failedQueue.forEach((prom) => {
-    if (error) prom.reject(error)
-    else if (token) prom.resolve(token)
-  })
-  failedQueue = []
-}
-
-instance.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
+api.interceptors.request.use(
+  (config) => {
     const token = useAuthStore.getState().token
-    config.headers = config.headers ?? ({} as AxiosRequestHeaders)
-    if (token) config.headers['Authorization'] = `Bearer ${token}`
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
     return config
   },
   (error) => Promise.reject(error)
 )
 
-instance.interceptors.response.use(
-  (response: AxiosResponse) => response,
-  async (error: AxiosError & { config?: InternalAxiosRequestConfig }) => {
-    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean }
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config
 
-    if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
-      if (isRefreshing) {
-        return new Promise<string>((resolve, reject) => {
-          failedQueue.push({ resolve, reject })
-        }).then((token) => {
-          if (originalRequest.headers) originalRequest.headers['Authorization'] = `Bearer ${token}`
-          return instance(originalRequest)
-        })
-      }
-
+    if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true
-      isRefreshing = true
 
       try {
-        const res = await axios.get<{ accessToken: string }>('/api/refreshToken', {
+        const refreshRes = await axios.get(`${baseURL}/refreshToken`, {
           withCredentials: true,
         })
 
-        const newToken = res.data.accessToken
-        useAuthStore.getState().actionSetToken(newToken)
+        const newAccessToken = refreshRes.data.accessToken
 
-        if (originalRequest.headers) {
-          originalRequest.headers['Authorization'] = `Bearer ${newToken}`
-        }
+        useAuthStore.getState().actionSetToken(newAccessToken)
 
-        processQueue(null, newToken)
-        return instance(originalRequest)
-      } catch (err) {
-        processQueue(err)
-        useAuthStore.getState().actionClearAuth?.()
-        return Promise.reject(err)
-      } finally {
-        isRefreshing = false
+        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`
+        return api(originalRequest)
+      } catch (refreshError) {
+        useAuthStore.getState().actionClearAuth()
+        window.location.href = '/login'
+        return Promise.reject(refreshError)
       }
     }
 
@@ -78,4 +49,4 @@ instance.interceptors.response.use(
   }
 )
 
-export default instance
+export default api
