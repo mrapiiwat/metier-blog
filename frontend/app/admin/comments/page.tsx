@@ -83,7 +83,7 @@ const CommentsPage = () => {
 
   const handleUpdateStatus = async (id: string, newStatus: CommentStatus) => {
     try {
-      await axios.patch(`/comment/${id}/status`, { status: newStatus })
+      await axios.put(`/comment/${id}/status`, { status: newStatus })
       fetchComments()
     } catch (error) {
       console.error('Failed to update status', error)
