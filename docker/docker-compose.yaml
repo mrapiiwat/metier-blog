@@ -1,0 +1,19 @@
+name: blog
+services:
+  db:
+    build:
+      context: ../db
+      dockerfile: dockerfile
+    container_name: blog-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - blog_postgres_data:/var/lib/postgresql
+
+volumes:
+  blog_postgres_data:
