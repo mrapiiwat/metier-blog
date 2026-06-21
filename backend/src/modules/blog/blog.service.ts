@@ -395,6 +395,7 @@ export class BlogService {
 			.select({
 				id: blogs.id,
 				title: blogs.title,
+				content: blogs.content,
 				slug: blogs.slug,
 				coverImage: blogs.coverImage,
 				createdAt: blogs.createdAt,

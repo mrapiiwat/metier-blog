@@ -7,6 +7,7 @@ import axios from '@/lib/axios/public'
 interface LatestBlog {
   id: string
   title: string
+  content: string
   slug: string
   coverImage: string
   authorName: string
@@ -59,10 +60,10 @@ const LatestSection = () => {
           })}
         </p>
         <h3 className="text-2xl font-bold mb-4 line-clamp-2">{blog.title}</h3>
-        <p className="mb-6 font-light line-clamp-6">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt
-          ut labore et dolore magna aliqua.
-        </p>
+        <p
+          className="mb-6 font-light line-clamp-6"
+          dangerouslySetInnerHTML={{ __html: blog.content }}
+        />
         <Link
           href={`/blogs/${blog.slug}`}
           className="bg-[#FF5959] hover:bg-[#FF7A7A] text-white px-8 py-3 rounded-md font-bold inline-block"
